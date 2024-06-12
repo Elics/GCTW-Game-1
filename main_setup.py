@@ -1,6 +1,7 @@
 #~~~ Imports ~~~
 import pygame
 import player
+import trash
 
 #Initialize pygame program
 pygame.init()
@@ -17,21 +18,35 @@ win = pygame.display.set_mode((winWidth, winHeight))
 pygame.display.set_caption("Our Game")
 
 #Initialize the player
-char = player.Player(50, 250, 24, 24, 10)
+#(x, y, width, height, speed)
+char = player.Player(50, 250, 100, 100, 40)
 
+#Global Variables
+char_x = char.x
+char_y = char.y
+char_w = char.width
+char_h = char.height
+char_s = char.speed
 
 #Setup Window Boundaries
-widthBoundary = winWidth - char.width - char.speed
-heightBoundary = winHeight - char.height - char.speed
+widthBoundary = winWidth - char_w - char_s
+heightBoundary = winHeight - char_h - char_s
+
+#Initialize trash sprites
+trash = trash.Trash(char_w, char_h, char_s, widthBoundary, heightBoundary)
 
 #~~~ Functions ~~~ 
 def redrawGameWindow():
     #Load/Update Background
     win.fill("white")
 
+    #Draw trash
+    # trash.trashHitbox()
+    # pygame.draw.rect(win, "red", trash.hitbox)
+
     #Draw the player
-    hitbox = pygame.Rect(char.x, char.y, char.width, char.height)
-    pygame.draw.rect(win, "black", hitbox)
+    char.playerHitbox()
+    pygame.draw.rect(win, "black", char.hitbox)
 
     #Update any changes
     pygame.display.flip()

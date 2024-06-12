@@ -16,6 +16,10 @@ class Player():
         self.speed = speed
         self.left = False
         self.right = False
+    
+    def playerHitbox(self):
+        self.hitbox = pygame.Rect(self.x, self.y, self.width, self.height)
+
         
 
     #Changes the x and y coordinates of the player. 

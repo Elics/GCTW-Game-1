@@ -17,7 +17,7 @@ win = pygame.display.set_mode((winWidth, winHeight))
 #Create name of the window
 pygame.display.set_caption("Our Game")
 
-#Global Variables
+#~~~ Global Variables ~~~
 char_x = 350 #winWidth * 0.5
 char_y = 350 #winHeight * 0.65
 char_w = 100
@@ -44,7 +44,7 @@ heightBoundary = winHeight - char_h - char_s
 score_font = pygame.font.SysFont('Verdana', 30, True)
 
 #~~~ Functions ~~~ 
-#Create a list of trash objects and add their hitboxes in trashHitboxes
+#Create and add trash objects to trashPile. Additionally add their hitboxes to trashHitboxes
 def spawnTrash(amount):
     for i in range(amount):
         trashPile.append(trash.Trash(char_w, char_h, char_s, widthBoundary, heightBoundary))
@@ -52,15 +52,13 @@ def spawnTrash(amount):
     for i in trashPile:
         trashHitboxes.append(i.hitbox)
 
-#Checks the collision between trash object and the player
+#Checks the collision between trash objects and the player
 #When they collide, replace with a new trash object, which will change shape and spawn location
 def collectTrash(player_hitbox):
-    #Check if the hitboxes collide base on the trashHitboxes list. 
-    #Return index of collided rectangle (-1 if none has been hit)
-    if pygame.Rect.collidelist(player_hitbox, trashHitboxes) != -1:
-        #Get the index of the trash that has been hit
-        collectTrash = player_hitbox.collidelist(trashHitboxes)
-
+    #Get the index of the trash object that been hit by the player's hitbox base on the trashHitboxes list.
+    #Returns -1 if nothing been hit yet
+    collectTrash = player_hitbox.collidelist(trashHitboxes)
+    if collectTrash != -1:
         #Create a new trash object 
         newTrash = trash.Trash(char_w, char_h, char_s, widthBoundary, heightBoundary)
         #Replace the current trash object with the new one

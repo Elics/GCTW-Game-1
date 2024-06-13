@@ -8,3 +8,6 @@ class Trash():
         self.x = random.randint(playerSpeed, widthBound)
         self.y = random.randint(playerSpeed, heightBound)
         self.hitbox = pygame.Rect(self.x, self.y, self.width, self.height)
+
+    def collected(self, collectPile):
+        return len(collectPile)

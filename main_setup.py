@@ -25,6 +25,7 @@ char_h = 100
 char_s = 40
 trashPile = []
 trashHitboxes = []
+tempPile = []
 collectPile = []
 
 #Initialize the player
@@ -42,20 +43,30 @@ for i in range(5):
 for i in trashPile:
     trashHitboxes.append(i.hitbox)
 
+#~~~ Text Messages ~~~
+#Don't know what fonts you have? Run this line below
+#print(pygame.font.get_fonts())
+# 1. First define the fonts, size, and boldness you want 
+# 2. Then render the actual text, toggle anti-alias, and color
+# 3. Finally, blit the rendered text in the redrawMethod
+score_font = pygame.font.SysFont('Verdana', 30, True)
+
+
+
 #~~~ Functions ~~~ 
 #Checks the collision between trash object and the player
-#When they collide, add the trash object to the collectPile, update the spawn location, and hide it
+#When they collide, add the trash object to the tempPile, update the spawn location, and hide it
 def collectTrash(player_hitbox):
     #Check if the hitboxes collide base on the trashHitboxes list/Return index of collided rectangle
     if pygame.Rect.collidelist(player_hitbox, trashHitboxes) != -1:
         #Get the index of the trash that has been hit
         collectTrash = player_hitbox.collidelist(trashHitboxes)
 
-        #Remove the trash from the trashPile and add it to the collectPile
-        collectPile.append(trashPile.pop(collectTrash))
+        #Remove the trash from the trashPile and add it to the tempPile
+        tempPile.append(trashPile.pop(collectTrash))
         
         #Remove the old trash hitbox from the trashHitboxes
-        trashHitboxes.pop(collectTrash)
+        collectPile.append(trashHitboxes.pop(collectTrash))
 
 #Update the game window with new animations/movement
 def redrawGameWindow():
@@ -65,6 +76,9 @@ def redrawGameWindow():
     #Load trash that exists in trashPile
     for trash in trashPile:
         pygame.draw.rect(win, "red", trash.hitbox)
+
+    score_txt = score_font.render("Collected: " + str(len(collectPile)), True, "black")
+    win.blit(score_txt, (10, 450))
 
     #Load the player/Update player's movement
     char.playerHitbox()

@@ -21,7 +21,7 @@ class Player():
     #Defines the player's hitbox
     #I created this as a separate method as the hitbox is constantly changing when the character moves
     def playerHitbox(self, scale):
-        self.hitbox = pygame.Rect(self.x + scale*11, self.y + scale*9, self.width*0.3, self.height*0.45)    
+        self.hitbox = pygame.Rect(self.x + scale*11, self.y + scale*9, self.width*0.3, self.height*0.45)   
 
     #Changes the x and y coordinates of the player. 
     #Requires the current key input, the width boundary and the height boundary of the window

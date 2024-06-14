@@ -21,7 +21,7 @@ pygame.display.set_caption("Our Game")
 #~~~ Global Variables ~~~
 char_x = 0 #winWidth * 0.5
 char_y = 0 #winHeight * 0.65
-char_s = 100
+char_s = 20
 scale = 6
 trashPile = []
 trashHitboxes = []
@@ -40,9 +40,6 @@ char.playerHitbox(scale)
 widthBoundary =  winWidth - char.hitbox[2] - char_s
 heightBoundary = winHeight - char.hitbox[3]- char_s
 
-print(widthBoundary)
-print(heightBoundary)
-
 #~~~ Messages/Fonts ~~~
 #Don't know what fonts you have? Run this line below
     #print(pygame.font.get_fonts())
@@ -55,7 +52,7 @@ score_font = pygame.font.SysFont('Verdana', 30, True)
 #Create and add trash objects to trashPile. Additionally add their hitboxes to trashHitboxes
 def spawnTrash(amount):
     for i in range(amount):
-        trashPile.append(trash.Trash(char_w, char_h, char_s, widthBoundary, heightBoundary))
+        trashPile.append(trash.Trash(char.hitbox[2], char.hitbox[3], char_s, widthBoundary, heightBoundary))
 
     for i in trashPile:
         trashHitboxes.append(i.hitbox)
@@ -68,7 +65,7 @@ def collectTrash(player_hitbox):
     collectTrash = player_hitbox.collidelist(trashHitboxes)
     if collectTrash != -1:
         #Create a new trash object 
-        newTrash = trash.Trash(char_w, char_h, char_s, widthBoundary, heightBoundary)
+        newTrash = trash.Trash(char.hitbox[2], char.hitbox[3], char_s, widthBoundary, heightBoundary)
         #Replace the current trash object with the new one
         trashPile[collectTrash] = newTrash
         
@@ -87,21 +84,20 @@ def redrawGameWindow():
     win.fill("white")
 
     #Load trash that exists in trashPile
-    # for trash in trashPile:
-    #     pygame.draw.rect(win, "red", trash.hitbox)
+    for trash in trashPile:
+        pygame.draw.rect(win, "red", trash.hitbox)
 
     #Display the score
-    # score_txt = score_font.render("Collected: " + str(len(collectPile)), True, "black")
-    # win.blit(score_txt, (10, 450))
+    score_txt = score_font.render("Collected: " + str(len(collectPile)), True, "black")
+    win.blit(score_txt, (10, winHeight-50))
 
     #Load the player/Update player's movement
     char.playerHitbox(scale)
-    pygame.draw.rect(win, "red", char.hitbox)
+    # pygame.draw.rect(win, "red", char.hitbox)
     win.blit(char_frame, (char.x, char.y))
-    print(char.hitbox[0], char.hitbox[1])
 
     #Check collision and update trash lists accordingly
-    # collectTrash(char.hitbox)
+    collectTrash(char.hitbox)
 
     #Update/Finalize all changes made
     pygame.display.flip()
@@ -110,7 +106,7 @@ def redrawGameWindow():
 #~~~ Main Loop ~~~
 #Toggles the Running status of the game (on/off)
 run = True
-spawnTrash(2)
+spawnTrash(5)
 while run:
     #Loading time for game
     pygame.time.delay(100)

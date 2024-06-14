@@ -2,13 +2,14 @@
 import pygame
 import player
 import trash
+import sprite
 
 #Initialize pygame program
 pygame.init()
 
 #~~~ Create Game Window ~~~
 #Window Dimension variables
-winWidth = 500
+winWidth = 800
 winHeight = 500
 
 #Initialize window 
@@ -20,16 +21,20 @@ pygame.display.set_caption("Our Game")
 #~~~ Global Variables ~~~
 char_x = 350 #winWidth * 0.5
 char_y = 350 #winHeight * 0.65
-char_w = 100
-char_h = 100
 char_s = 40
+scale = 6
 trashPile = []
 trashHitboxes = []
 collectPile = []
 
 #Initialize the player
 #(x, y, width, height, speed)
-char = player.Player(char_x, char_y ,char_w, char_h, char_s)
+char_sheet = sprite.Sprite("NPC.png")
+char_frame = char_sheet.getFrame(0, 0, 32, 32, 32, scale)
+char_w = char_frame.get_width()
+char_h = char_frame.get_height()
+char = player.Player(char_x, char_y , char_w, char_h, char_s)
+
 
 #Setup Window Boundaries
 widthBoundary = winWidth - char_w - char_s
@@ -79,19 +84,20 @@ def redrawGameWindow():
     win.fill("white")
 
     #Load trash that exists in trashPile
-    for trash in trashPile:
-        pygame.draw.rect(win, "red", trash.hitbox)
+    # for trash in trashPile:
+    #     pygame.draw.rect(win, "red", trash.hitbox)
 
     #Display the score
-    score_txt = score_font.render("Collected: " + str(len(collectPile)), True, "black")
-    win.blit(score_txt, (10, 450))
+    # score_txt = score_font.render("Collected: " + str(len(collectPile)), True, "black")
+    # win.blit(score_txt, (10, 450))
 
     #Load the player/Update player's movement
-    char.playerHitbox()
-    pygame.draw.rect(win, "black", char.hitbox)
+    # char.playerHitbox(scale)
+    #pygame.draw.rect(win, "black", char.hitbox)
+    win.blit(char_frame, (char.x, char.y))
 
     #Check collision and update trash lists accordingly
-    collectTrash(char.hitbox)
+    # collectTrash(char.hitbox)
 
     #Update/Finalize all changes made
     pygame.display.flip()

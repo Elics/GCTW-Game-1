@@ -21,28 +21,28 @@ class Player():
     #Defines the player's hitbox
     #I created this as a separate method as the hitbox is constantly changing when the character moves
     def playerHitbox(self, scale):
-        self.hitbox = pygame.Rect(self.x + scale*6, self.y + scale*4, self.width*0.5, self.height*0.7)    
+        self.hitbox = pygame.Rect(self.x + scale*11, self.y + scale*9, self.width*0.3, self.height*0.45)    
 
     #Changes the x and y coordinates of the player. 
     #Requires the current key input, the width boundary and the height boundary of the window
     def movement(self, keys, widthBounds, heightBounds):
         #Checks the key and moves the character correspondingly
-            if keys[pygame.K_a] and self.x > self.speed:
+            if keys[pygame.K_a] and self.hitbox[0] > self.speed :
                 self.x -= self.speed
                 left = False
                 right = True
                 #current_set = 1
-            elif keys[pygame.K_d] and self.x < widthBounds:
+            elif keys[pygame.K_d] and self.hitbox[0] < widthBounds:
                 self.x += self.speed
                 left = True
                 right = False
                 #current_set = 1
-            elif keys[pygame.K_w] and self.y > self.speed:
+            elif keys[pygame.K_w] and self.hitbox[1] > self.speed:
                 self.y -= self.speed
                 left = True
                 right = False
                 #current_set = 1
-            elif keys[pygame.K_s] and self.y < heightBounds:
+            elif keys[pygame.K_s] and self.hitbox[1] < heightBounds:
                 self.y += self.speed
                 left = True
                 right = False

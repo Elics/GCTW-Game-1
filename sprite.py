@@ -13,7 +13,7 @@ class Sprite():
         frame = pygame.Surface((w,h))
 
         #Maintain the transparency of the sprite
-        #frame.set_colorkey((0,0,0))
+        frame.set_colorkey((0,0,0))
 
         #Get the spriteSheet, location of the surface, and the portion of the spriteSheet (row)
         frame.blit(self.spriteSheet, (0,0), ((order*w),y,w,h))

@@ -9,8 +9,8 @@ pygame.init()
 
 #~~~ Create Game Window ~~~
 #Window Dimension variables
-winWidth = 800
-winHeight = 500
+winWidth = 1000
+winHeight = 600
 
 #Initialize window 
 win = pygame.display.set_mode((winWidth, winHeight))
@@ -19,9 +19,9 @@ win = pygame.display.set_mode((winWidth, winHeight))
 pygame.display.set_caption("Our Game")
 
 #~~~ Global Variables ~~~
-char_x = 350 #winWidth * 0.5
-char_y = 350 #winHeight * 0.65
-char_s = 40
+char_x = 0 #winWidth * 0.5
+char_y = 0 #winHeight * 0.65
+char_s = 100
 scale = 6
 trashPile = []
 trashHitboxes = []
@@ -30,15 +30,18 @@ collectPile = []
 #Initialize the player
 #(x, y, width, height, speed)
 char_sheet = sprite.Sprite("NPC.png")
-char_frame = char_sheet.getFrame(0, 0, 32, 32, 32, scale)
+char_frame = char_sheet.getFrame(0, 0, 0, 32, 32, scale)
 char_w = char_frame.get_width()
 char_h = char_frame.get_height()
-char = player.Player(char_x, char_y , char_w, char_h, char_s)
-
+char = player.Player(char_x, char_y, char_w, char_h, char_s)
+char.playerHitbox(scale)
 
 #Setup Window Boundaries
-widthBoundary = winWidth - char_w - char_s
-heightBoundary = winHeight - char_h - char_s
+widthBoundary =  winWidth - char.hitbox[2] - char_s
+heightBoundary = winHeight - char.hitbox[3]- char_s
+
+print(widthBoundary)
+print(heightBoundary)
 
 #~~~ Messages/Fonts ~~~
 #Don't know what fonts you have? Run this line below
@@ -92,9 +95,10 @@ def redrawGameWindow():
     # win.blit(score_txt, (10, 450))
 
     #Load the player/Update player's movement
-    # char.playerHitbox(scale)
-    #pygame.draw.rect(win, "black", char.hitbox)
+    char.playerHitbox(scale)
+    pygame.draw.rect(win, "red", char.hitbox)
     win.blit(char_frame, (char.x, char.y))
+    print(char.hitbox[0], char.hitbox[1])
 
     #Check collision and update trash lists accordingly
     # collectTrash(char.hitbox)

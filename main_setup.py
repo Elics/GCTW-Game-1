@@ -30,13 +30,17 @@ collectPile = []
 #Initialize the player
 #(x, y, width, height, speed)
 char_sheet = sprite.Sprite("NPC.png")
+#Frame Number, X, Y, Width, Height, Scale
 char_frame = char_sheet.getFrame(0, 0, 0, 32, 32, scale)
 char_w = char_frame.get_width()
 char_h = char_frame.get_height()
 char = player.Player(char_x, char_y, char_w, char_h, char_s)
 char.playerHitbox(scale)
 
-#Setup Window Boundaries
+set = char_sheet.getFrameSet()
+walkFront = set[3]
+
+#Setup Window Boundaries based on player's hitbox
 widthBoundary =  winWidth - char.hitbox[2] - char_s
 heightBoundary = winHeight - char.hitbox[3]- char_s
 
@@ -64,7 +68,8 @@ def collectTrash(player_hitbox):
     #Returns -1 if nothing been hit yet
     collectTrash = player_hitbox.collidelist(trashHitboxes)
     if collectTrash != -1:
-        #Create a new trash object 
+        #Create a new trash object with proportions based on player's hitbox
+        # playerWidth, playerHeight, playerSpeed, window width, window height
         newTrash = trash.Trash(char.hitbox[2], char.hitbox[3], char_s, widthBoundary, heightBoundary)
         #Replace the current trash object with the new one
         trashPile[collectTrash] = newTrash

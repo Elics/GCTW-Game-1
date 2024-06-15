@@ -37,8 +37,13 @@ char_h = char_frame.get_height()
 char = player.Player(char_x, char_y, char_w, char_h, char_s)
 char.playerHitbox(scale)
 
-set = char_sheet.getFrameSet()
-walkFront = set[3]
+# Animations
+animations = char_sheet.getAnimations()
+previousTime = pygame.time.get_ticks()
+frameSet = char_sheet.getFrameSet()
+frameCoolDown = 200
+currentFrame = 0
+
 
 #Setup Window Boundaries based on player's hitbox
 widthBoundary =  winWidth - char.hitbox[2] - char_s
@@ -99,7 +104,9 @@ def redrawGameWindow():
     #Load the player/Update player's movement
     char.playerHitbox(scale)
     # pygame.draw.rect(win, "red", char.hitbox)
-    win.blit(char_frame, (char.x, char.y))
+    # win.blit(char_frame, (char.x, char.y))
+     #Show frame
+    win.blit(animations[0][currentFrame], (char.x, char.y))
 
     #Check collision and update trash lists accordingly
     collectTrash(char.hitbox)
@@ -126,6 +133,19 @@ while run:
     #Then base on these keys, move the player around the map
     keys = pygame.key.get_pressed()
     char.movement(keys, widthBoundary, heightBoundary)
+
+    # oooooooooooooooooooooooooooooooooooooooooooooooooooooo
+    # char_sheet.frameTiming(0, 0)
+    # Get the current ingame time
+    currentTime = pygame.time.get_ticks()
+    
+    #Check the duration between frames. If the frame cooldown is over, get the next frame and reset the cooldown
+    if currentTime - previousTime >= frameCoolDown:
+        currentFrame += 1
+        previousTime = currentTime
+    #When all frames are played, reset to the starting frame
+    if currentFrame >= frameSet[0]:
+        currentFrame = 0
     
     #Update the window
     redrawGameWindow()

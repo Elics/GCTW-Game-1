@@ -18,6 +18,8 @@ class Player():
         self.currentSet = 0
         self.left = False 
         self.right = False
+        self.up = False
+        self.down = False
     
     #Defines the player's hitbox
     #I created this as a separate method as the hitbox is constantly changing when the character moves
@@ -30,23 +32,31 @@ class Player():
         #Checks the key and moves the character correspondingly
             if keys[pygame.K_a] and self.hitbox[0] > self.speed :
                 self.x -= self.speed
-                left = False
-                right = True
+                self.left = False
+                self.right = True
+                self.down = False
+                self.up = False
                 self.currentSet = 1
             elif keys[pygame.K_d] and self.hitbox[0] < widthBounds:
                 self.x += self.speed
-                left = True
-                right = False
+                self.left = True
+                self.right = False
+                self.down = False
+                self.up = False
                 self.currentSet = 2
             elif keys[pygame.K_w] and self.hitbox[1] > self.speed:
                 self.y -= self.speed
-                left = True
-                right = False
+                self.left = False
+                self.right = False
+                self.down = True
+                self.up = False
                 self.currentSet = 3
             elif keys[pygame.K_s] and self.hitbox[1] < heightBounds:
                 self.y += self.speed
-                left = True
-                right = False
+                self.left = False
+                self.right = False
+                self.down = False
+                self.up = True
                 self.currentSet = 4
             else:
                 self.currentSet = 0

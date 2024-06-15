@@ -11,10 +11,6 @@ animations = [standFront, standLeft, standBack, walkFront, walkLeft, walkBack]
 #The amount of frames for each set of animations (ex. walking takes 4 frames)
 frameSet = [2, 2, 2, 4, 4, 4]
 
-#Timing the animations
-lastUpdate = pygame.time.get_ticks()
-frameCoolDown = 120
-currentFrame = 0
 
 class Sprite():
     #Get the image file and load it as the sprite sheet
@@ -42,17 +38,29 @@ class Sprite():
         return frame
     
     #Get the whole set of frames for each animations
-    def getFrameSet(self):
+    def getAnimations(self):
         count = 0
         for set in frameSet:
             for i in range(set):
                 animations[count].append(self.getFrame(i, 0, count * 32, 32, 32, self.scale))
-            print("Animation: " + str(count) + ": " + str(animations[count]))
+            # print("Animation: " + str(count) + ": " + str(animations[count]))
             count = count + 1
         return animations
+    
+    def getFrameSet(self):
+        return frameSet
 
-
-    # def animation(self, setNumber, playerDirection):
-    #     if setNumber == 0:
+    # #~~~ Update frame animation ~~~
+    # def frameTiming(self, currentFrame, setNumber):
+    #     #Get the current ingame time
+    #     currentTime = pygame.time.get_ticks()
+        
+    #     #Check the duration between frames. If the frame cooldown is over, get the next frame and reset the cooldown
+    #     if currentTime - previousTime >= frameCoolDown:
+    #         currentFrame += 1
+    #         previousTime = currentTime
+    #     #When all frames are played, reset to the starting frame
+    #     if currentFrame >= frameSet[setNumber]:
+    #         currentFrame = 0
 
 

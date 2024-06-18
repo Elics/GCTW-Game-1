@@ -36,27 +36,27 @@ class Player():
                 self.right = True
                 self.down = False
                 self.up = False
-                self.currentSet = 1
+                self.currentSet = 6
             elif keys[pygame.K_d] and self.hitbox[0] < widthBounds:
                 self.x += self.speed
                 self.left = True
                 self.right = False
                 self.down = False
                 self.up = False
-                self.currentSet = 2
+                self.currentSet = 4
             elif keys[pygame.K_w] and self.hitbox[1] > self.speed:
                 self.y -= self.speed
                 self.left = False
                 self.right = False
                 self.down = True
                 self.up = False
-                self.currentSet = 3
+                self.currentSet = 5
             elif keys[pygame.K_s] and self.hitbox[1] < heightBounds:
                 self.y += self.speed
                 self.left = False
                 self.right = False
                 self.down = False
                 self.up = True
-                self.currentSet = 4
+                self.currentSet = 3
             else:
                 self.currentSet = 0

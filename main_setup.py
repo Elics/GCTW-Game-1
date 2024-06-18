@@ -37,13 +37,13 @@ char_h = char_frame.get_height()
 char = player.Player(char_x, char_y, char_w, char_h, char_s)
 char.playerHitbox(scale)
 
-# Animations
+#~~ Animations Variables ~~ 
 animations = char_sheet.getAnimations()
 previousTime = pygame.time.get_ticks()
 frameSet = char_sheet.getFrameSet()
-frameCoolDown = 200
+frameCoolDown = 250
+currentSet = 0
 currentFrame = 0
-
 
 #Setup Window Boundaries based on player's hitbox
 widthBoundary =  winWidth - char.hitbox[2] - char_s
@@ -106,7 +106,7 @@ def redrawGameWindow():
     # pygame.draw.rect(win, "red", char.hitbox)
     # win.blit(char_frame, (char.x, char.y))
      #Show frame
-    win.blit(animations[0][currentFrame], (char.x, char.y))
+    win.blit(animations[currentSet][currentFrame], (char.x, char.y))
 
     #Check collision and update trash lists accordingly
     collectTrash(char.hitbox)
@@ -133,6 +133,8 @@ while run:
     #Then base on these keys, move the player around the map
     keys = pygame.key.get_pressed()
     char.movement(keys, widthBoundary, heightBoundary)
+    currentSet = char.currentSet
+    #Implement a way to add a walk right mode
 
     # oooooooooooooooooooooooooooooooooooooooooooooooooooooo
     # char_sheet.frameTiming(0, 0)
@@ -144,7 +146,7 @@ while run:
         currentFrame += 1
         previousTime = currentTime
     #When all frames are played, reset to the starting frame
-    if currentFrame >= frameSet[0]:
+    if currentFrame >= frameSet[currentSet]:
         currentFrame = 0
     
     #Update the window

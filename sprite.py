@@ -1,13 +1,15 @@
 import pygame
 
 #All animation sets
-standFront = []
+standFront = [] 
 standLeft = []
 standBack = []
 walkFront = []
-walkLeft = []
+walkRight = []
 walkBack = []
-animations = [standFront, standLeft, standBack, walkFront, walkLeft, walkBack]
+#All inverted animations will be appended at the end
+walkLeft = []
+animations = [standFront, standLeft, standBack, walkFront, walkRight, walkBack, walkLeft]
 #The amount of frames for each set of animations (ex. walking takes 4 frames)
 frameSet = [2, 2, 2, 4, 4, 4]
 
@@ -44,7 +46,14 @@ class Sprite():
             for i in range(set):
                 animations[count].append(self.getFrame(i, 0, count * 32, 32, 32, self.scale))
             # print("Animation: " + str(count) + ": " + str(animations[count]))
-            count = count + 1
+            count += 1
+
+        #For inverted animations, such as walkRight
+        frameSet.append(4) #Add the number of frames in frameSets to be tracked
+        #Then loop through each walkRight frames and invert them horizontally for a walkRight
+        for frame in walkRight:
+            walkLeft.append(pygame.transform.flip(frame, True, False))
+        # count += 1
         return animations
     
     def getFrameSet(self):

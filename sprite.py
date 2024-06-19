@@ -1,19 +1,23 @@
 import pygame
 
-#All animation sets
+#~~ Animation Set Lists ~~
 standFront = [] 
-standLeft = []
+standRight = []
 standBack = []
 walkFront = []
 walkRight = []
 walkBack = []
 #All inverted animations will be appended at the end
 walkLeft = []
-animations = [standFront, standLeft, standBack, walkFront, walkRight, walkBack, walkLeft]
+
+#Final Animations in single list
+animations = [standFront, standRight, standBack, walkFront, walkRight, walkBack, walkLeft]
+
 #The amount of frames for each set of animations (ex. walking takes 4 frames)
 frameSet = [2, 2, 2, 4, 4, 4]
 
-
+#Creates sprite animations. Takes any image file and cut up the files to get single images/frames.
+#getAnimations() = Takes a whole set of frames and insert them into the corresponding lists. 
 class Sprite():
     #Get the image file and load it as the sprite sheet
     def __init__(self, filename):
@@ -39,26 +43,35 @@ class Sprite():
         frame = pygame.transform.scale(frame, (w * scale, h * scale))
         return frame
     
-    #Get the whole set of frames for each animations
+    #Get the whole set of frames for each animations and insert to corresponding animation set list
     def getAnimations(self):
+        #Index of the current animation set
         count = 0
+
+        #Goes through frame set to collect the proper amount of frames per row
+        #Ex. Walk Animation = 4 frames, Splice the image in a row 4 times
         for set in frameSet:
             for i in range(set):
                 animations[count].append(self.getFrame(i, 0, count * 32, 32, 32, self.scale))
-            # print("Animation: " + str(count) + ": " + str(animations[count]))
             count += 1
 
-        #For inverted animations, such as walkRight
-        frameSet.append(4) #Add the number of frames in frameSets to be tracked
+        #For inverted animations, such as walkLeft
+        #Add the number of frames to frameSets to be tracked
+        frameSet.append(4) 
         #Then loop through each walkRight frames and invert them horizontally for a walkRight
         for frame in walkRight:
             walkLeft.append(pygame.transform.flip(frame, True, False))
-        # count += 1
+
+        #Update all animation sets and return the whole list 
         return animations
     
+    #Return the frameSet list
     def getFrameSet(self):
         return frameSet
 
+#Attempt to move all animation methods in the sprite class
+#Currently not working as there is no way to track the ticks properly, as well as updating the currentFrame 
+#I will try to go back and optimize this portion later
     # #~~~ Update frame animation ~~~
     # def frameTiming(self, currentFrame, setNumber):
     #     #Get the current ingame time

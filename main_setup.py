@@ -19,6 +19,7 @@ win = pygame.display.set_mode((winWidth, winHeight))
 pygame.display.set_caption("Our Game")
 
 #~~~ Global Variables ~~~
+runLevel = True
 char_x = 0 #winWidth * 0.5
 char_y = 0 #winHeight * 0.65
 char_s = 20
@@ -26,6 +27,19 @@ scale = 6
 trashPile = []
 trashHitboxes = []
 collectPile = []
+
+#~~ Stage Timer ~~
+#Initialize clock object to track time
+clock = pygame.time.Clock()
+#Choose the time limit for the stage
+stageCounter = 10
+#Initialize the timer
+stage_event = pygame.USEREVENT +1
+#Updates the stage_event every 1000 miliseconds/1 second
+pygame.time.set_timer(stage_event, 1000)
+# In the main loop, update the counter 
+# and print out the time until the timer ends at 0
+
 
 #Initialize the player
 #(x, y, width, height, speed)
@@ -76,6 +90,7 @@ def collectTrash(player_hitbox):
         #Create a new trash object with proportions based on player's hitbox
         # playerWidth, playerHeight, playerSpeed, window width, window height
         newTrash = trash.Trash(char.hitbox[2], char.hitbox[3], char_s, widthBoundary, heightBoundary)
+        
         #Replace the current trash object with the new one
         trashPile[collectTrash] = newTrash
         
@@ -99,12 +114,18 @@ def redrawGameWindow():
 
     #Display the score
     score_txt = score_font.render("Collected: " + str(len(collectPile)), True, "black")
+    stageCounter_txt = score_font.render(str(stageCounter), True, "black")
     win.blit(score_txt, (10, winHeight-50))
+    win.blit(stageCounter_txt, (0,0))
+
 
     #Load the player/Update player's movement
     char.playerHitbox(scale)
+
+    #Player Hitbox testing
     # pygame.draw.rect(win, "red", char.hitbox)
     # win.blit(char_frame, (char.x, char.y))
+
      #Show frame
     win.blit(animations[currentSet][currentFrame], (char.x, char.y))
 
@@ -114,11 +135,17 @@ def redrawGameWindow():
     #Update/Finalize all changes made
     pygame.display.flip()
 
+#~~ Scenes ~~
+# levelOne = pygame.USEREVENT +2
+# levelOne_run = pygame.USEREVENT +3
 
 #~~~ Main Loop ~~~
 #Toggles the Running status of the game (on/off)
 run = True
+
+#Spawn the initial set of trash in the map
 spawnTrash(5)
+
 while run:
     #Loading time for game
     pygame.time.delay(100)
@@ -128,29 +155,35 @@ while run:
         #Handle scenario when the player closes the window (X)
         if event.type == pygame.QUIT:
             run = False
-    
-    #Get the user's input, specifically which keys they pressed
-    #Then base on these keys, move the player around the map
-    keys = pygame.key.get_pressed()
-    char.movement(keys, widthBoundary, heightBoundary)
-    currentSet = char.currentSet
-    #Implement a way to add a walk right mode
 
-    # oooooooooooooooooooooooooooooooooooooooooooooooooooooo
-    # char_sheet.frameTiming(0, 0)
-    # Get the current ingame time
-    currentTime = pygame.time.get_ticks()
-    
-    #Check the duration between frames. If the frame cooldown is over, get the next frame and reset the cooldown
-    if currentTime - previousTime >= frameCoolDown:
-        currentFrame += 1
-        previousTime = currentTime
-    #When all frames are played, reset to the starting frame
-    if currentFrame >= frameSet[currentSet]:
-        currentFrame = 0
-    
-    #Update the window
-    redrawGameWindow()
+        elif event.type == stage_event:
+            stageCounter -= 1
+
+        if stageCounter == 0:
+            pygame.time.set_timer(stage_event, 0)
+            # pygame.event.post(pygame.event.Event(levelOne))
+        
+    if runLevel == True:
+        #Get the user's input, specifically which keys they pressed
+        #Then base on these keys, move the player around the map
+        keys = pygame.key.get_pressed()
+        char.movement(keys, widthBoundary, heightBoundary)
+        currentSet = char.currentSet
+
+        #~~ Running Animations in Main Loop ~~
+        # Get the current ingame time
+        currentTime = pygame.time.get_ticks()
+        
+        #Check the duration between frames. If the frame cooldown is over, get the next frame and reset the cooldown
+        if currentTime - previousTime >= frameCoolDown:
+            currentFrame += 1
+            previousTime = currentTime
+        #When all frames are played, reset to the starting frame
+        if currentFrame >= frameSet[currentSet]:
+            currentFrame = 0
+        
+        #Update the window
+        redrawGameWindow()
 
 #When the game is off, close the pygame program as well.
 pygame.quit()

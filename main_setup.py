@@ -3,6 +3,7 @@ import pygame
 import player
 import trash
 import sprite
+import level
 
 #Initialize pygame program
 pygame.init()
@@ -19,14 +20,18 @@ win = pygame.display.set_mode((winWidth, winHeight))
 pygame.display.set_caption("Our Game")
 
 #~~~ Global Variables ~~~
-runLevel = True
 char_x = 0 #winWidth * 0.5
 char_y = 0 #winHeight * 0.65
 char_s = 20
 scale = 6
+#Stores all the surfaces/trash sprites
 trashPile = []
+#Contains the rectangles of all the generated trash
 trashHitboxes = []
+#Holds all collected trash
 collectPile = []
+#Tracks score on each level
+scoresList = []
 
 #~~ Stage Timer ~~
 #Initialize clock object to track time
@@ -41,14 +46,18 @@ pygame.time.set_timer(stage_event, 1000)
 # and print out the time until the timer ends at 0
 
 
-#Initialize the player
+#~~ Player Initialization ~~
 #(x, y, width, height, speed)
+#Add a sprite sheet to create the player
 char_sheet = sprite.Sprite("NPC.png")
 #Frame Number, X, Y, Width, Height, Scale
+#Take a single frame from the sprite sheet to obtain dimensions
 char_frame = char_sheet.getFrame(0, 0, 0, 32, 32, scale)
 char_w = char_frame.get_width()
 char_h = char_frame.get_height()
+#Initialize the player
 char = player.Player(char_x, char_y, char_w, char_h, char_s)
+#Create player hitbox
 char.playerHitbox(scale)
 
 #~~ Animations Variables ~~ 
@@ -65,11 +74,13 @@ heightBoundary = winHeight - char.hitbox[3]- char_s
 
 #~~~ Messages/Fonts ~~~
 #Don't know what fonts you have? Run this line below
-    #print(pygame.font.get_fonts())
+# print(pygame.font.get_fonts())
 # 1. First define the fonts, size, and boldness you want 
 # 2. Then render the actual text, toggle anti-alias, and color
 # 3. Finally, blit the rendered text in the redrawMethod
 score_font = pygame.font.SysFont('Verdana', 30, True)
+title_font = pygame.font.SysFont('Arial', 80, True)
+subtitle_font = pygame.font.SysFont('Arial', 40, False, True)
 
 #~~~ Functions ~~~ 
 #Create and add trash objects to trashPile. Additionally add their hitboxes to trashHitboxes
@@ -113,11 +124,11 @@ def redrawGameWindow():
         pygame.draw.rect(win, "red", trash.hitbox)
 
     #Display the score
-    score_txt = score_font.render("Collected: " + str(len(collectPile)), True, "black")
+    score = len(collectPile)
+    score_txt = score_font.render("Collected: " + str(score), True, "black")
     stageCounter_txt = score_font.render(str(stageCounter), True, "black")
     win.blit(score_txt, (10, winHeight-50))
     win.blit(stageCounter_txt, (0,0))
-
 
     #Load the player/Update player's movement
     char.playerHitbox(scale)
@@ -131,13 +142,12 @@ def redrawGameWindow():
 
     #Check collision and update trash lists accordingly
     collectTrash(char.hitbox)
+   
 
     #Update/Finalize all changes made
     pygame.display.flip()
-
-#~~ Scenes ~~
-# levelOne = pygame.USEREVENT +2
-# levelOne_run = pygame.USEREVENT +3
+    
+    return score
 
 #~~~ Main Loop ~~~
 #Toggles the Running status of the game (on/off)
@@ -145,6 +155,16 @@ run = True
 
 #Spawn the initial set of trash in the map
 spawnTrash(5)
+
+#~~ Game Statuses ~~
+#Initialize the game status and play the starting screen first
+gameStatus = level.gameStatus("start")
+#Initialize all the states
+start = level.startGame(win, gameStatus, title_font, subtitle_font)
+end = level.gameEnd(win, gameStatus, title_font, subtitle_font)
+level = level.runLevel(gameStatus)
+#Add the states to the gameStates dictionary
+gameStates = {"start":start, "end":end, "level":level}
 
 while run:
     #Loading time for game
@@ -154,16 +174,31 @@ while run:
     for event in pygame.event.get():
         #Handle scenario when the player closes the window (X)
         if event.type == pygame.QUIT:
-            run = False
-
-        elif event.type == stage_event:
+            run = False 
+        #Check when the collection game mode has started, then toggle on the counter
+        elif event.type == stage_event and gameStatus.getState() == "level":
             stageCounter -= 1
-
+        #When the level ends, several changes will be made:
+        # 1. Change to cutscene
+        # 2. Add the player's score to the scoresList, and wipe out the current score (managed by the collecitonPile)
+        # 3. Reset the counter (currently default to 10 seconds)
         if stageCounter == 0:
-            pygame.time.set_timer(stage_event, 0)
-            # pygame.event.post(pygame.event.Event(levelOne))
+            gameStatus.setState("end")
+            scoresList.append(score)
+            while len(collectPile) != 0:
+                collectPile.pop()
+            stageCounter = 10
+
+    #Checks the current state. If it's a cutscene, then the variable
+    #collecitonMode will be set to false, allowing the cutscene to play instead
+    if gameStatus.getState() != "runLevel":
+        level.collectionMode = False
+    #Get the current gameStatus and check through the gameStates dictionary
+    #When there is a match, run the given state
+    gameStates[gameStatus.getState()].run()
         
-    if runLevel == True:
+
+    if level.collectionMode == True:
         #Get the user's input, specifically which keys they pressed
         #Then base on these keys, move the player around the map
         keys = pygame.key.get_pressed()
@@ -175,15 +210,13 @@ while run:
         currentTime = pygame.time.get_ticks()
         
         #Check the duration between frames. If the frame cooldown is over, get the next frame and reset the cooldown
-        if currentTime - previousTime >= frameCoolDown:
-            currentFrame += 1
-            previousTime = currentTime
-        #When all frames are played, reset to the starting frame
-        if currentFrame >= frameSet[currentSet]:
-            currentFrame = 0
-        
+        #Returns the currentFrame to run
+        currentFrame = char_sheet.frameTiming(currentTime, previousTime, frameCoolDown, currentFrame, currentSet)[0]
+        #Returns the time of the previous frame
+        previousTime = char_sheet.frameTiming(currentTime, previousTime, frameCoolDown, currentFrame, currentSet)[1]
+
         #Update the window
-        redrawGameWindow()
+        score = redrawGameWindow()
 
 #When the game is off, close the pygame program as well.
 pygame.quit()

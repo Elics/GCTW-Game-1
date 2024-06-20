@@ -73,16 +73,13 @@ class Sprite():
 #Currently not working as there is no way to track the ticks properly, as well as updating the currentFrame 
 #I will try to go back and optimize this portion later
     # #~~~ Update frame animation ~~~
-    # def frameTiming(self, currentFrame, setNumber):
-    #     #Get the current ingame time
-    #     currentTime = pygame.time.get_ticks()
-        
-    #     #Check the duration between frames. If the frame cooldown is over, get the next frame and reset the cooldown
-    #     if currentTime - previousTime >= frameCoolDown:
-    #         currentFrame += 1
-    #         previousTime = currentTime
-    #     #When all frames are played, reset to the starting frame
-    #     if currentFrame >= frameSet[setNumber]:
-    #         currentFrame = 0
+    def frameTiming(self, currentTime, previousTime, frameCoolDown, currentFrame, currentSet):
+        if currentTime - previousTime >= frameCoolDown:
+            currentFrame += 1   
+            previousTime = currentTime
+        #When all frames are played, reset to the starting frame
+        if currentFrame >= frameSet[currentSet]:
+            currentFrame = 0
+        return (currentFrame, previousTime)
 
 

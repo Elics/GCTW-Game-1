@@ -22,7 +22,7 @@ pygame.display.set_caption("Our Game")
 #~~~ Global Variables ~~~
 char_x = 0 #winWidth * 0.5
 char_y = 0 #winHeight * 0.65
-char_s = 20
+char_s = 10
 scale = 6
 #Stores all the surfaces/trash sprites
 trashPile = []
@@ -37,14 +37,15 @@ scoresList = []
 #Initialize clock object to track time
 clock = pygame.time.Clock()
 #Choose the time limit for the stage
-stageCounter = 10
+#Separate varible created for shop upgrade
+baseTime = 5
+stageCounter = baseTime
 #Initialize the timer
 stage_event = pygame.USEREVENT +1
 #Updates the stage_event every 1000 miliseconds/1 second
 pygame.time.set_timer(stage_event, 1000)
 # In the main loop, update the counter 
 # and print out the time until the timer ends at 0
-
 
 #~~ Player Initialization ~~
 #(x, y, width, height, speed)
@@ -81,6 +82,16 @@ heightBoundary = winHeight - char.hitbox[3]- char_s
 score_font = pygame.font.SysFont('Verdana', 30, True)
 title_font = pygame.font.SysFont('Arial', 80, True)
 subtitle_font = pygame.font.SysFont('Arial', 40, False, True)
+
+#~~ Shop Features ~~
+#Since all the variables are initialized above, the shop will be created below
+upgradeIndex = 0
+#A List of all Upgrades
+ #Upgrades
+    # char.speed += 10
+    # baseTime += 10
+upgradeList = [char.speed, baseTime]
+
 
 #~~~ Functions ~~~ 
 #Create and add trash objects to trashPile. Additionally add their hitboxes to trashHitboxes
@@ -156,15 +167,17 @@ run = True
 #Spawn the initial set of trash in the map
 spawnTrash(5)
 
-#~~ Game Statuses ~~
+#~~ Game Statuses the ~~
 #Initialize the game status and play the starting screen first
 gameStatus = level.gameStatus("start")
 #Initialize all the states
 start = level.startGame(win, gameStatus, title_font, subtitle_font)
 end = level.gameEnd(win, gameStatus, title_font, subtitle_font)
+shop = level.upgradeShop(win, gameStatus, title_font, subtitle_font, char.speed, baseTime)
 level = level.runLevel(gameStatus)
+
 #Add the states to the gameStates dictionary
-gameStates = {"start":start, "end":end, "level":level}
+gameStates = {"start":start, "end":end, "shop":shop, "level":level}
 
 while run:
     #Loading time for game
@@ -183,11 +196,10 @@ while run:
         # 2. Add the player's score to the scoresList, and wipe out the current score (managed by the collecitonPile)
         # 3. Reset the counter (currently default to 10 seconds)
         if stageCounter == 0:
-            gameStatus.setState("end")
+            gameStatus.setState("shop")
             scoresList.append(score)
             while len(collectPile) != 0:
                 collectPile.pop()
-            stageCounter = 10
 
     #Checks the current state. If it's a cutscene, then the variable
     #collecitonMode will be set to false, allowing the cutscene to play instead
@@ -197,7 +209,32 @@ while run:
     #When there is a match, run the given state
     gameStates[gameStatus.getState()].run()
         
+    #Shop interface/Interaction
+    #Get the index to the upgrade from the upgradeList
+    if gameStatus.getState() == "shop":
+        if pygame.key.get_pressed()[pygame.K_d]:
+            upgradeIndex += 1
+        elif pygame.key.get_pressed()[pygame.K_a]:
+            upgradeIndex -= 1
+        elif upgradeIndex > len(upgradeList) - 1 or upgradeIndex < 0:
+            upgradeIndex = 0
 
+        #After confirming the index with SPACE, check if the current status is below 60
+        #Then add the upgrade to the selected index
+        #Update all stats and reset the timer base on the update made. Play level when choice is made
+        if pygame.key.get_pressed()[pygame.K_SPACE]:
+            if(upgradeList[upgradeIndex] < 60):
+                upgradeList[upgradeIndex] = upgradeList[upgradeIndex] + 10
+                char.speed = upgradeList[0]
+                baseTime = upgradeList[1] 
+                #Update the stageCounter and the speedBuff display
+                stageCounter = baseTime
+                shop.speedBuff = char.speed
+                shop.timeBuff = baseTime
+                gameStatus.setState("level")
+       
+
+    #Runs Collection Mode: Collecting trash
     if level.collectionMode == True:
         #Get the user's input, specifically which keys they pressed
         #Then base on these keys, move the player around the map

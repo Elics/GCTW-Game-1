@@ -22,8 +22,8 @@ pygame.display.set_caption("Our Game")
 #~~~ Global Variables ~~~
 char_x = 0 #winWidth * 0.5
 char_y = 0 #winHeight * 0.65
-char_s = 10
-scale = 6
+char_s = 10 #Character Speed
+scale = 6 #Scale of character
 #Stores all the surfaces/trash sprites
 trashPile = []
 #Contains the rectangles of all the generated trash
@@ -38,7 +38,7 @@ scoresList = []
 clock = pygame.time.Clock()
 #Choose the time limit for the stage
 #Separate varible created for shop upgrade
-baseTime = 5
+baseTime = 10
 stageCounter = baseTime
 #Initialize the timer
 stage_event = pygame.USEREVENT +1
@@ -167,7 +167,7 @@ run = True
 #Spawn the initial set of trash in the map
 spawnTrash(5)
 
-#~~ Game Statuses the ~~
+#~~ Game Statuses ~~
 #Initialize the game status and play the starting screen first
 gameStatus = level.gameStatus("start")
 #Initialize all the states
@@ -196,6 +196,7 @@ while run:
         # 2. Add the player's score to the scoresList, and wipe out the current score (managed by the collecitonPile)
         # 3. Reset the counter (currently default to 10 seconds)
         if stageCounter == 0:
+            stageCounter = baseTime
             gameStatus.setState("shop")
             scoresList.append(score)
             while len(collectPile) != 0:
@@ -213,11 +214,11 @@ while run:
     #Get the index to the upgrade from the upgradeList
     if gameStatus.getState() == "shop":
         if pygame.key.get_pressed()[pygame.K_d]:
-            upgradeIndex += 1
+            upgradeIndex = 1
         elif pygame.key.get_pressed()[pygame.K_a]:
-            upgradeIndex -= 1
-        elif upgradeIndex > len(upgradeList) - 1 or upgradeIndex < 0:
             upgradeIndex = 0
+        #Highlights the corresponding selection made
+        shop.selected = upgradeIndex
 
         #After confirming the index with SPACE, check if the current status is below 60
         #Then add the upgrade to the selected index
@@ -231,9 +232,13 @@ while run:
                 stageCounter = baseTime
                 shop.speedBuff = char.speed
                 shop.timeBuff = baseTime
+                pygame.time.delay(300)
                 gameStatus.setState("level")
-       
 
+        #If Q is pressed, return the End Screen
+        elif pygame.key.get_pressed()[pygame.K_q]:
+            gameStatus.setState("end")
+        
     #Runs Collection Mode: Collecting trash
     if level.collectionMode == True:
         #Get the user's input, specifically which keys they pressed

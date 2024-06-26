@@ -18,17 +18,24 @@ char = pygame.image.load('standing.png')
 clock = pygame.time.Clock()
 
 score = 0
-font =pygame.font.SysFont('poppins', 30)
+font = pygame.font.SysFont('poppins', 30)
 
 
+#text
+def draw_text(text,font,text_col,x,y):
+    img = font.render(text,True, text_col)
+    screen.blit(img,(x,y))
 
 
 
 #color
 #BG =    (50,50,50)
+TEXT_COL =(244,244,244)
 GREEN = (0,255,0)
 BLUE =  (0,0,255)
-#RED =   (255,0,0)
+BLACK =(0,0,0)
+WHITE =(255,255,255)
+RED =   (255,0,0)
 
 
 
@@ -94,6 +101,41 @@ for _ in range(8):
     trash = Trash(random.randint(0, SCREENWIDTH - 25), random.randint(0, SCREENHEIGHT - 25), 25, 25)
     trashes.append(trash) 
 
+
+#menu function
+def draw_menu():
+    screen.fill(BLACK)
+    title = font.render("Main Menu", True, WHITE)
+    play_button = font.render("Play", True, WHITE)
+    options_button = font.render("Options", True, WHITE)
+    quit_button = font.render("Quit", True, WHITE)
+    
+    screen.blit(title, (SCREENWIDTH // 2 - title.get_width() // 2, 50))
+    screen.blit(play_button, (SCREENWIDTH // 2 - play_button.get_width() // 2, 150))
+    screen.blit(options_button, (SCREENWIDTH // 2 - options_button.get_width() // 2, 200))
+    screen.blit(quit_button, (SCREENWIDTH // 2 - quit_button.get_width() // 2, 250))
+    
+    pygame.display.update()
+    return play_button.get_rect(topleft=(SCREENWIDTH // 2 - play_button.get_width() // 2, 150)), options_button.get_rect(topleft=(SCREENWIDTH // 2 - options_button.get_width() // 2, 200)), quit_button.get_rect(topleft=(SCREENWIDTH // 2 - quit_button.get_width() // 2, 250))
+
+
+
+# Function to handle options screen
+def draw_options():
+    screen.fill(BLACK)
+    title = font.render("Options", True, WHITE)
+    back_button = font.render("Back", True, WHITE)
+    
+    screen.blit(title, (SCREENWIDTH // 2 - title.get_width() // 2, 50))
+    screen.blit(back_button, (SCREENWIDTH // 2 - back_button.get_width() // 2, 250))
+    
+    pygame.display.update()
+    return back_button.get_rect(topleft=(SCREENWIDTH // 2 - back_button.get_width() // 2, 250))
+
+
+
+
+
 #function
 def redrawGameWindow():
     screen.blit(bg,(0,0))
@@ -107,9 +149,28 @@ def redrawGameWindow():
 #this makes the window stays -- main
 running = True
 man = Collector(210,410,64,64)
+game_state = "menu"
 
 while running:
     clock.tick(27)
+
+
+    """
+    mx,my = pygame.mouse.get_pos()
+
+    button_1 = pygame.Rect(50,100,200,50)
+    button_2 = pygame.Rect(50,100,200,50)
+    if button_1.collidepoint((mx,my)):
+        pass
+
+    if button_2.collidepoint((mx,my)):
+        pass
+
+
+    pygame.draw.rect(screen,(255,0,0),button_1)
+    pygame.draw.rect(screen,(255,0,0),button_2)
+
+    """
     
 
 
@@ -117,40 +178,63 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+    if game_state == 'menu':
+        play_button_rect, options_button_rect,quit_button_rect = draw_menu()
+        for event in pygame.event.get():
+            if event.type ==pygame.MOUSEBUTTONDOWN:
+                if play_button_rect.collidepoint(event.pos):
+                    game_state = "play"
 
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT] and man.x > man.vel:
-        man.x -= man.vel
-        man.left = True
-        man.right = False
-        man.standing = False
+                elif options_button_rect.collidepoint(event.pos):
+                    game_state = "options"
 
-    elif keys[pygame.K_RIGHT] and man.x < SCREENWIDTH - man.width- man.vel:
-        man.x += man.vel
-        man.left = False
-        man.right = True
-        man.standing = False
+                elif quit_button_rect.collidepoint(event.pos):
+                    running =False
+                
     
-    else:
-        man.standing =True
+    elif game_state == "play":
+    
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT] and man.x > man.vel:
+            man.x -= man.vel
+            man.left = True
+            man.right = False
+            man.standing = False
 
-    if keys[pygame.K_UP] and man.y > man.vel:
-           man.y -= man.vel
-
-    if keys[pygame.K_DOWN] and man.y < SCREENWIDTH - man.height - man.vel:
-            man.y += man.vel
+        elif keys[pygame.K_RIGHT] and man.x < SCREENWIDTH - man.width- man.vel:
+            man.x += man.vel
+            man.left = False
+            man.right = True
+            man.standing = False
         
+        else:
+            man.standing =True
 
-    for trash in trashes:
-        if man.x < trash.x + trash.width and man.x + man.width > trash.x:
-            if man.y < trash.y + trash.height and man.y + man.height > trash.y:
-                trash.x = random.randint(0, SCREENWIDTH - trash.width)
-                trash.y = random.randint(0, SCREENHEIGHT - trash.height)
-                trash.hit()
-                score += 10
+        if keys[pygame.K_UP] and man.y > man.vel:
+            man.y -= man.vel
+
+        if keys[pygame.K_DOWN] and man.y < SCREENWIDTH - man.height - man.vel:
+                man.y += man.vel
+            
+
+        for trash in trashes:
+            if man.x < trash.x + trash.width and man.x + man.width > trash.x:
+                if man.y < trash.y + trash.height and man.y + man.height > trash.y:
+                    trash.x = random.randint(0, SCREENWIDTH - trash.width)
+                    trash.y = random.randint(0, SCREENHEIGHT - trash.height)
+                    trash.hit()
+                    score += 10
+   
+        redrawGameWindow()
+
+    elif game_state == 'options':
+        back_button_rect = draw_options()
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if back_button_rect.collidepoint(event.pos):
+                    game_state = 'menu'
    
     
     
-    redrawGameWindow()
 
 pygame.quit()

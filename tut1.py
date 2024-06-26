@@ -139,8 +139,10 @@ def draw_options():
 #function
 def redrawGameWindow():
     screen.blit(bg,(0,0))
-    text = font.render("Score: "+ str(score), 1, BLUE)
+    text = font.render("Score: "+ str(score), 1, BLUE) 
     screen.blit(text, (390, 10))
+    menu_text = font.render("Menu", 1, BLUE)
+    screen.blit(menu_text, (10, 10))
     man.draw(screen)
     for trash in trashes:
         trash.draw(screen)
@@ -149,7 +151,7 @@ def redrawGameWindow():
 #this makes the window stays -- main
 running = True
 man = Collector(210,410,64,64)
-game_state = "menu"
+game_state = "play"
 
 while running:
     clock.tick(27)
@@ -191,8 +193,11 @@ while running:
                 elif quit_button_rect.collidepoint(event.pos):
                     running =False
                 
+                
     
+   # elif game_state == "play":
     elif game_state == "play":
+        
     
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and man.x > man.vel:
@@ -206,6 +211,11 @@ while running:
             man.left = False
             man.right = True
             man.standing = False
+
+        elif keys[pygame.K_SPACE]:
+            game_state ='menu'
+
+
         
         else:
             man.standing =True

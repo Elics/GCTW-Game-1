@@ -6,28 +6,56 @@ import pygame
 class gameStatus():
     def __init__(self, currentState):
         self.currentState = currentState
+        self.previousState = currentState
     def getState(self):
         return self.currentState
     def setState(self, changeState):
         self.currentState = changeState
+    #Question methods to retrieve previous state
+    def setPreviousState(self):
+        self.previousState = self.currentState
+    def getPreviousState(self):
+        return self.previousState
 
 #The starting screen
 class startGame():
-    def __init__(self, display, gameStatus, title, subtitle):
+    def __init__(self, display, gameStatus, font, subfont):
         self.display = display
         self.gameStatus = gameStatus
-        self.font = title
-        self.subfont = subtitle
+        self.font = font
+        self.subfont = subfont
+
     def run(self):
         self.display.fill("white")
         title_txt = self.font.render("Environmental", True, "black")
-        press_space_txt = self.subfont.render("Press SPACE to start", True, "Black")
+        press_space_txt = self.subfont.render("Press SPACE to start/Press M for the menu", True, "Black")
+
         self.display.blit(title_txt, (200, 150))
-        self.display.blit(press_space_txt, (400, 250))
+        self.display.blit(press_space_txt, (200, 250))
+
         pygame.display.flip()
+
         if pygame.key.get_pressed()[pygame.K_SPACE]:
             pygame.time.delay(300)
             self.gameStatus.setState("level")
+
+class menuScreen():
+    def __init__(self, display, gameStatus, font, subfont):
+        self.display = display
+        self.gameStatus = gameStatus
+        self.font = font
+        self.subfont = subfont
+
+    def run(self):
+        self.display.fill("gray")
+        title_txt = self.font.render("MENU", True, "white")
+        notice_txt = self.subfont.render("The MENU screen is currently under construction", True, "red")
+
+        self.display.blit(title_txt, (600, 300))
+        self.display.blit(notice_txt, (200, 400))
+
+        pygame.display.flip()
+
 
 #Displays Upgrade Shop after every level
 class upgradeShop():
@@ -39,6 +67,7 @@ class upgradeShop():
         self.speedBuff = speed
         self.timeBuff = time
         self.selected = None
+
     def run(self):
         self.display.fill("#E5FFB8")
         title_txt = self.font.render("Shop", True, "black")
@@ -72,20 +101,24 @@ class upgradeShop():
         
 #The ending scene
 class gameEnd():
-    def __init__(self, display, gameStatus, title, subtitle):
+    def __init__(self, display, gameStatus, font, subfont):
         self.display = display
         self.gameStatus = gameStatus 
-        self.font = title
-        self.subfont = subtitle
+        self.font = font
+        self.subfont = subfont
+
     def run(self):
         self.display.fill("black")
         end_txt = self.font.render("Game Over", True, "white")
         press_space_txt = self.subfont.render("Press SPACE to go back to Main Menu", True, "white")
         note_txt = self.subfont.render("All upgrades are kept until you press X!", True, "white")
+
         self.display.blit(end_txt, (300, 300))
         self.display.blit(press_space_txt, (320, 400))
         self.display.blit(note_txt, (320, 450))
+
         pygame.display.flip()
+
         if pygame.key.get_pressed()[pygame.K_SPACE]:
             self.gameStatus.setState("start")
 

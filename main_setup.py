@@ -172,12 +172,13 @@ spawnTrash(5)
 gameStatus = level.gameStatus("start")
 #Initialize all the states
 start = level.startGame(win, gameStatus, title_font, subtitle_font)
+menu = level.menuScreen(win, gameStatus, title_font, subtitle_font)
 end = level.gameEnd(win, gameStatus, title_font, subtitle_font)
 shop = level.upgradeShop(win, gameStatus, title_font, subtitle_font, char.speed, baseTime)
 level = level.runLevel(gameStatus)
 
 #Add the states to the gameStates dictionary
-gameStates = {"start":start, "end":end, "shop":shop, "level":level}
+gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "level":level}
 
 while run:
     #Loading time for game
@@ -209,6 +210,14 @@ while run:
     #Get the current gameStatus and check through the gameStates dictionary
     #When there is a match, run the given state
     gameStates[gameStatus.getState()].run()
+
+    #Menu Screen Toggle
+    if pygame.key.get_pressed()[pygame.K_m]:
+        if gameStatus.getState() != "menu":
+            gameStatus.setPreviousState()
+            gameStatus.setState("menu")
+        else:
+            gameStatus.setState(gameStatus.getPreviousState())
         
     #Shop interface/Interaction
     #Get the index to the upgrade from the upgradeList

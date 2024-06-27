@@ -11,4 +11,6 @@ class Trash():
         self.x = random.randint(playerSpeed, widthBound)
         self.y = random.randint(playerSpeed, heightBound)
         self.hitbox = pygame.Rect(self.x, self.y, self.width, self.height)
+        #Chances of the trash being treasure (1/5 or 20%)
+        self.treasure = random.randint(1, 5)
 

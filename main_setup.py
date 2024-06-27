@@ -84,8 +84,11 @@ title_font = pygame.font.SysFont('Arial', 80, True)
 subtitle_font = pygame.font.SysFont('Arial', 40, False, True)
 
 #~~ Shop Features ~~
-#Since all the variables are initialized above, the shop will be created below
+#Since all the required variables are initialized above, the shop will be created below
+#Index to loop through available upgrades
 upgradeIndex = 0
+#A list to store all coin values collected
+coinsList = []
 #A List of all Upgrades
  #Upgrades
     # char.speed += 10
@@ -113,13 +116,18 @@ def collectTrash(player_hitbox):
         # playerWidth, playerHeight, playerSpeed, window width, window height
         newTrash = trash.Trash(char.hitbox[2], char.hitbox[3], char_s, widthBoundary, heightBoundary)
         
-        #Replace the current trash object with the new one
-        trashPile[collectTrash] = newTrash
-        
         #To track score, I currently have a list. 
         #Everytime a trash been collected, it will be tallied in this list
         #I need to find a way to replace this method, wastes resources
-        collectPile.append(1)
+        #If a trash has the treasure attribute, it will provide coins and 5 points
+        if trashPile[collectTrash].treasure == 1:
+            coinsList.append(10)
+            collectPile.append(5)
+        else:
+            collectPile.append(1)
+
+        #Replace the current trash object with the new one
+        trashPile[collectTrash] = newTrash
 
         #Replace the old hitbox with the new hitbox
         trashHitboxes[collectTrash] = newTrash.hitbox
@@ -132,7 +140,10 @@ def redrawGameWindow():
 
     #Load trash that exists in trashPile
     for trash in trashPile:
-        pygame.draw.rect(win, "red", trash.hitbox)
+        if trash.treasure == 1:
+            pygame.draw.rect(win, "blue", trash.hitbox)
+        else:    
+            pygame.draw.rect(win, "red", trash.hitbox)
 
     #Display the score
     score = len(collectPile)
@@ -140,6 +151,14 @@ def redrawGameWindow():
     stageCounter_txt = score_font.render(str(stageCounter), True, "black")
     win.blit(score_txt, (10, winHeight-50))
     win.blit(stageCounter_txt, (0,0))
+
+    #Display coins
+    totalCoins = 0
+    for coin in coinsList:
+        totalCoins += coin
+    coin_txt = score_font.render("Coins: " + str(totalCoins), True, "black")
+    win.blit(coin_txt, (800, winHeight-50))
+
 
     #Load the player/Update player's movement
     char.playerHitbox(scale)
@@ -158,7 +177,7 @@ def redrawGameWindow():
     #Update/Finalize all changes made
     pygame.display.flip()
     
-    return score
+    return [score, totalCoins]
 
 #~~~ Main Loop ~~~
 #Toggles the Running status of the game (on/off)
@@ -169,12 +188,12 @@ spawnTrash(5)
 
 #~~ Game Statuses ~~
 #Initialize the game status and play the starting screen first
-gameStatus = level.gameStatus("start")
+gameStatus = level.gameStatus("shop")
 #Initialize all the states
 start = level.startGame(win, gameStatus, title_font, subtitle_font)
 menu = level.menuScreen(win, gameStatus, title_font, subtitle_font)
 end = level.gameEnd(win, gameStatus, title_font, subtitle_font)
-shop = level.upgradeShop(win, gameStatus, title_font, subtitle_font, char.speed, baseTime)
+shop = level.upgradeShop(win, gameStatus, title_font, subtitle_font, char.speed, baseTime, 0)
 level = level.runLevel(gameStatus)
 
 #Add the states to the gameStates dictionary
@@ -199,7 +218,7 @@ while run:
         if stageCounter == 0:
             stageCounter = baseTime
             gameStatus.setState("shop")
-            scoresList.append(score)
+            scoresList.append(scoreCoinList[0])
             while len(collectPile) != 0:
                 collectPile.pop()
 
@@ -218,14 +237,20 @@ while run:
             gameStatus.setState("menu")
         else:
             gameStatus.setState(gameStatus.getPreviousState())
+        #If Q is pressed, return the End Screen
+    if pygame.key.get_pressed()[pygame.K_q] and gameStatus.getState() == "menu":
+        gameStatus.setState("end")
         
     #Shop interface/Interaction
     #Get the index to the upgrade from the upgradeList
     if gameStatus.getState() == "shop":
-        if pygame.key.get_pressed()[pygame.K_d]:
-            upgradeIndex = 1
-        elif pygame.key.get_pressed()[pygame.K_a]:
-            upgradeIndex = 0
+        if pygame.key.get_pressed()[pygame.K_d] and upgradeIndex < 2:
+            pygame.time.delay(100)
+            upgradeIndex += 1
+        elif pygame.key.get_pressed()[pygame.K_a] and upgradeIndex > 0:
+            pygame.time.delay(100)
+            upgradeIndex -= 1
+        
         #Highlights the corresponding selection made
         shop.selected = upgradeIndex
 
@@ -233,20 +258,43 @@ while run:
         #Then add the upgrade to the selected index
         #Update all stats and reset the timer base on the update made. Play level when choice is made
         if pygame.key.get_pressed()[pygame.K_SPACE]:
-            if(upgradeList[upgradeIndex] < 60):
-                upgradeList[upgradeIndex] = upgradeList[upgradeIndex] + 10
-                char.speed = upgradeList[0]
-                baseTime = upgradeList[1] 
-                #Update the stageCounter and the speedBuff display
-                stageCounter = baseTime
-                shop.speedBuff = char.speed
-                shop.timeBuff = baseTime
+            #Plays the level after buying/skipping upgrade
+            if upgradeIndex == 2:
                 pygame.time.delay(300)
                 gameStatus.setState("level")
-
-        #If Q is pressed, return the End Screen
-        elif pygame.key.get_pressed()[pygame.K_q]:
-            gameStatus.setState("end")
+            #Player buys an upgrade and has money to do so
+            elif upgradeList[upgradeIndex] < 60 and len(coinsList) > 0:
+                #Collect the coins
+                if int(upgradeList[upgradeIndex] / 10) <= len(coinsList):
+                    for i in range(int(upgradeList[upgradeIndex] / 10)):
+                        coinsList.pop()
+                    #Increase corresponding upgrade by 10 on the upgradeList
+                    upgradeList[upgradeIndex] = upgradeList[upgradeIndex] + 10
+                    #Update the corresponding variables base on the values in the upgradeList
+                    char.speed = upgradeList[0]
+                    baseTime = upgradeList[1] 
+                    #Update the stageCounter, the buff displays, and coin display for the gameStatus.upgradeShop
+                    stageCounter = baseTime
+                    shop.speedBuff = char.speed
+                    shop.timeBuff = baseTime  
+                #If the player does not have enough coins
+                else:
+                    lessCoins_txt = subtitle_font.render("Not enough coins for next upgrade level!", True, "blue")
+                    win.blit(lessCoins_txt, (250, 250))
+                    pygame.display.flip()
+                    pygame.time.delay(500)
+            #If the player reached max upgrade on any item
+            elif upgradeList[upgradeIndex] == 60:
+                maxUpgradeReach_txt = subtitle_font.render("Max Upgrade Reached!", True, "blue")
+                win.blit(maxUpgradeReach_txt, (350, 250))
+                pygame.display.flip()
+                pygame.time.delay(500)
+            #If the player has no coins
+            else:
+                noCoins_txt = subtitle_font.render("You have no coins!", True, "blue")
+                win.blit(noCoins_txt, (350, 250))
+                pygame.display.flip()
+                pygame.time.delay(500)
         
     #Runs Collection Mode: Collecting trash
     if level.collectionMode == True:
@@ -267,7 +315,10 @@ while run:
         previousTime = char_sheet.frameTiming(currentTime, previousTime, frameCoolDown, currentFrame, currentSet)[1]
 
         #Update the window
-        score = redrawGameWindow()
+        scoreCoinList = redrawGameWindow()
+
+        #Update Shop Coin Display
+        shop.coins = scoreCoinList[1]
 
 #When the game is off, close the pygame program as well.
 pygame.quit()

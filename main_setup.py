@@ -153,9 +153,7 @@ def redrawGameWindow():
     win.blit(stageCounter_txt, (0,0))
 
     #Display coins
-    totalCoins = 0
-    for coin in coinsList:
-        totalCoins += coin
+    totalCoins = sum(coinsList)
     coin_txt = score_font.render("Coins: " + str(totalCoins), True, "black")
     win.blit(coin_txt, (800, winHeight-50))
 
@@ -188,7 +186,7 @@ spawnTrash(5)
 
 #~~ Game Statuses ~~
 #Initialize the game status and play the starting screen first
-gameStatus = level.gameStatus("shop")
+gameStatus = level.gameStatus("start")
 #Initialize all the states
 start = level.startGame(win, gameStatus, title_font, subtitle_font)
 menu = level.menuScreen(win, gameStatus, title_font, subtitle_font)
@@ -268,6 +266,7 @@ while run:
                 if int(upgradeList[upgradeIndex] / 10) <= len(coinsList):
                     for i in range(int(upgradeList[upgradeIndex] / 10)):
                         coinsList.pop()
+                    shop.coins = sum(coinsList)
                     #Increase corresponding upgrade by 10 on the upgradeList
                     upgradeList[upgradeIndex] = upgradeList[upgradeIndex] + 10
                     #Update the corresponding variables base on the values in the upgradeList

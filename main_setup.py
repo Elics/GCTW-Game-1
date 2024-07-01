@@ -50,16 +50,21 @@ pygame.time.set_timer(stage_event, 1000)
 #~~ Player Initialization ~~
 #(x, y, width, height, speed)
 #Add a sprite sheet to create the player
-char_sheet = sprite.Sprite("NPC.png")
+char_sheet = sprite.Sprite("NPC.png", scale)
 #Frame Number, X, Y, Width, Height, Scale
 #Take a single frame from the sprite sheet to obtain dimensions
-char_frame = char_sheet.getFrame(0, 0, 0, 32, 32, scale)
+char_frame = char_sheet.getFrame(0, 0, 0, 32, 32)
 char_w = char_frame.get_width()
 char_h = char_frame.get_height()
 #Initialize the player
 char = player.Player(char_x, char_y, char_w, char_h, char_s)
 #Create player hitbox
 char.playerHitbox(scale)
+
+#Scaled up character for dialogue
+char_dialogue_sheet = sprite.Sprite("NPC.png", 10)
+dialogue_char = char_dialogue_sheet.getFrame(0, 0, 0, 32, 32)
+dialogue_animations = char_dialogue_sheet.getAnimations()
 
 #~~ Animations Variables ~~ 
 animations = char_sheet.getAnimations()
@@ -68,6 +73,7 @@ frameSet = char_sheet.getFrameSet()
 frameCoolDown = 250
 currentSet = 0
 currentFrame = 0
+
 
 #Setup Window Boundaries based on player's hitbox
 widthBoundary =  winWidth - char.hitbox[2] - char_s
@@ -82,6 +88,8 @@ heightBoundary = winHeight - char.hitbox[3]- char_s
 score_font = pygame.font.SysFont('Verdana', 30, True)
 title_font = pygame.font.SysFont('Arial', 80, True)
 subtitle_font = pygame.font.SysFont('Arial', 40, False, True)
+name_font = pygame.font.SysFont('Nunito', 40, True)
+# dialogue_font = pygame.font.SysFont('')
 
 #~~ Shop Features ~~
 #Since all the required variables are initialized above, the shop will be created below
@@ -94,7 +102,6 @@ coinsList = []
     # char.speed += 10
     # baseTime += 10
 upgradeList = [char.speed, baseTime]
-
 
 #~~~ Functions ~~~ 
 #Create and add trash objects to trashPile. Additionally add their hitboxes to trashHitboxes
@@ -131,7 +138,6 @@ def collectTrash(player_hitbox):
 
         #Replace the old hitbox with the new hitbox
         trashHitboxes[collectTrash] = newTrash.hitbox
-
 
 #Update the game window with new animations/movement
 def redrawGameWindow():
@@ -186,16 +192,17 @@ spawnTrash(5)
 
 #~~ Game Statuses ~~
 #Initialize the game status and play the starting screen first
-gameStatus = level.gameStatus("start")
+gameStatus = level.gameStatus("sceneOne")
 #Initialize all the states
 start = level.startGame(win, gameStatus, title_font, subtitle_font)
 menu = level.menuScreen(win, gameStatus, title_font, subtitle_font)
 end = level.gameEnd(win, gameStatus, title_font, subtitle_font)
 shop = level.upgradeShop(win, gameStatus, title_font, subtitle_font, char.speed, baseTime, 0)
+sceneOne = level.sceneOne(win, gameStatus, name_font, subtitle_font, animations, dialogue_animations)
 level = level.runLevel(gameStatus)
 
 #Add the states to the gameStates dictionary
-gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "level":level}
+gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "level":level, "sceneOne":sceneOne} 
 
 while run:
     #Loading time for game

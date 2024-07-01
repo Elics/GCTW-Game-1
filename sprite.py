@@ -1,18 +1,5 @@
 import pygame
 
-#~~ Animation Set Lists ~~
-standFront = [] 
-standRight = []
-standBack = []
-walkFront = []
-walkRight = []
-walkBack = []
-#All inverted animations will be appended at the end
-walkLeft = []
-
-#Final Animations in single list
-animations = [standFront, standRight, standBack, walkFront, walkRight, walkBack, walkLeft]
-
 #The amount of frames for each set of animations (ex. walking takes 4 frames)
 frameSet = [2, 2, 2, 4, 4, 4]
 
@@ -20,16 +7,26 @@ frameSet = [2, 2, 2, 4, 4, 4]
 #getAnimations() = Takes a whole set of frames and insert them into the corresponding lists. 
 class Sprite():
     #Get the image file and load it as the sprite sheet
-    def __init__(self, filename):
+    def __init__(self, filename, scale):
         self.filename = filename
         self.spriteSheet = pygame.image.load(filename)
+        #Keep the scale as an attribute
+        self.scale = scale
+        #~~ Animation Set Lists ~~
+        self.standFront = [] 
+        self.standRight = []
+        self.standBack = []
+        self.walkFront = []
+        self.walkRight = []
+        self.walkBack = []
+        #All inverted animations will be appended at the end
+        self. walkLeft = []
+        #Final Animations in single list
+        self.animations = [self.standFront, self.standRight, self.standBack, self.walkFront, self.walkRight, self.walkBack, self.walkLeft]
 
     #Base on the given file, take a portion of it to create a frame
     #Frame Number, x-coord, y-coord, width, height, scale image
-    def getFrame(self, order, x, y, w, h, scale):
-        #Keep the scale as an attribute
-        self.scale = scale
-
+    def getFrame(self, order, x, y, w, h):
         #Create empty image (rectangle) which will hold the sprite frame
         frame = pygame.Surface((w,h))
 
@@ -40,7 +37,7 @@ class Sprite():
         frame.blit(self.spriteSheet, (0,0), ((order*w),y,w,h))
 
         #Increasing the scale of the picture (sprite image, [width, height])
-        frame = pygame.transform.scale(frame, (w * scale, h * scale))
+        frame = pygame.transform.scale(frame, (w * self.scale, h * self.scale))
         return frame
     
     #Get the whole set of frames for each animations and insert to corresponding animation set list
@@ -52,18 +49,18 @@ class Sprite():
         #Ex. Walk Animation = 4 frames, Splice the image in a row 4 times
         for set in frameSet:
             for i in range(set):
-                animations[count].append(self.getFrame(i, 0, count * 32, 32, 32, self.scale))
+                self.animations[count].append(self.getFrame(i, 0, count * 32, 32, 32))
             count += 1
 
         #For inverted animations, such as walkLeft
         #Add the number of frames to frameSets to be tracked
         frameSet.append(4) 
         #Then loop through each walkRight frames and invert them horizontally for a walkRight
-        for frame in walkRight:
-            walkLeft.append(pygame.transform.flip(frame, True, False))
+        for frame in self.walkRight:
+            self.walkLeft.append(pygame.transform.flip(frame, True, False))
 
         #Update all animation sets and return the whole list 
-        return animations
+        return self.animations
     
     #Return the frameSet list
     def getFrameSet(self):

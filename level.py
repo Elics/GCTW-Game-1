@@ -145,3 +145,19 @@ class runLevel():
         self.gameStatus = gameStatus 
     def run(self):
         self.collectionMode = True
+
+# ~~Cutscenes~~
+class sceneOne():
+    def __init__(self, display, gameStatus, font, subfont, animationSet, dialogueSet):
+        self.display = display
+        self.gameStatus = gameStatus 
+        self.font = font
+        self.subfont = subfont
+        self.animationSet = animationSet
+        self.dialogueSet = dialogueSet
+    def run(self):
+        self.display.fill("white")
+        self.display.blit(self.animationSet[2][0], (300,100))
+        self.display.blit(self.dialogueSet[0][0], (0, 400))
+
+        pygame.display.flip()

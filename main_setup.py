@@ -56,14 +56,13 @@ char_sheet = sprite.Sprite("NPC.png", scale)
 char_frame = char_sheet.getFrame(0, 0, 0, 32, 32)
 char_w = char_frame.get_width()
 char_h = char_frame.get_height()
-#Initialize the player
+#Initialize the player using the single frame
 char = player.Player(char_x, char_y, char_w, char_h, char_s)
 #Create player hitbox
 char.playerHitbox(scale)
 
 #Scaled up character for dialogue
 char_dialogue_sheet = sprite.Sprite("NPC.png", 10)
-dialogue_char = char_dialogue_sheet.getFrame(0, 0, 0, 32, 32)
 dialogue_animations = char_dialogue_sheet.getAnimations()
 
 #~~ Animations Variables ~~ 
@@ -87,7 +86,8 @@ heightBoundary = winHeight - char.hitbox[3]- char_s
 # 3. Finally, blit the rendered text in the redrawMethod
 score_font = pygame.font.SysFont('Verdana', 30, True)
 title_font = pygame.font.SysFont('Arial', 80, True)
-subtitle_font = pygame.font.SysFont('Arial', 40, False, True)
+subtitle_font = pygame.font.SysFont('Arial', 40, False)
+instruction_font = pygame.font.SysFont('Arial', 20, False)
 name_font = pygame.font.SysFont('Nunito', 40, True)
 # dialogue_font = pygame.font.SysFont('')
 
@@ -192,17 +192,18 @@ spawnTrash(5)
 
 #~~ Game Statuses ~~
 #Initialize the game status and play the starting screen first
-gameStatus = level.gameStatus("sceneOne")
+gameStatus = level.gameStatus("start")
 #Initialize all the states
-start = level.startGame(win, gameStatus, title_font, subtitle_font)
-menu = level.menuScreen(win, gameStatus, title_font, subtitle_font)
-end = level.gameEnd(win, gameStatus, title_font, subtitle_font)
-shop = level.upgradeShop(win, gameStatus, title_font, subtitle_font, char.speed, baseTime, 0)
-sceneOne = level.sceneOne(win, gameStatus, name_font, subtitle_font, animations, dialogue_animations)
-level = level.runLevel(gameStatus)
+start = level.startGame(win, gameStatus, [title_font, instruction_font])
+menu = level.menuScreen(win, gameStatus, [title_font, subtitle_font])
+end = level.gameEnd(win, gameStatus, [title_font, subtitle_font])
+shop = level.upgradeShop(win, gameStatus, [title_font, subtitle_font, instruction_font], char.speed, baseTime, 0)
+runLevel = level.runLevel(gameStatus)
+sceneOne = level.sceneOne(win, gameStatus, [name_font, instruction_font], animations, dialogue_animations)
+
 
 #Add the states to the gameStates dictionary
-gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "level":level, "sceneOne":sceneOne} 
+gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "runLevel":runLevel, "sceneOne":sceneOne} 
 
 while run:
     #Loading time for game
@@ -214,7 +215,7 @@ while run:
         if event.type == pygame.QUIT:
             run = False 
         #Check when the collection game mode has started, then toggle on the counter
-        elif event.type == stage_event and gameStatus.getState() == "level":
+        elif event.type == stage_event and gameStatus.getState() == "runLevel":
             stageCounter -= 1
         #When the level ends, several changes will be made:
         # 1. Change to cutscene
@@ -229,11 +230,12 @@ while run:
 
     #Checks the current state. If it's a cutscene, then the variable
     #collecitonMode will be set to false, allowing the cutscene to play instead
-    if gameStatus.getState() != "runLevel":
-        level.collectionMode = False
+    # if gameStatus.getState() != "runLevel":
+    #     level.collectionMode = False
     #Get the current gameStatus and check through the gameStates dictionary
     #When there is a match, run the given state
     gameStates[gameStatus.getState()].run()
+    
 
     #Menu Screen Toggle
     if pygame.key.get_pressed()[pygame.K_m]:
@@ -266,7 +268,7 @@ while run:
             #Plays the level after buying/skipping upgrade
             if upgradeIndex == 2:
                 pygame.time.delay(300)
-                gameStatus.setState("level")
+                gameStatus.setState("runLevel")
             #Player buys an upgrade and has money to do so
             elif upgradeList[upgradeIndex] < 60 and len(coinsList) > 0:
                 #Collect the coins
@@ -303,7 +305,8 @@ while run:
                 pygame.time.delay(500)
         
     #Runs Collection Mode: Collecting trash
-    if level.collectionMode == True:
+    # if level.collectionMode == True:
+    if gameStatus.getState() == "runLevel":
         #Get the user's input, specifically which keys they pressed
         #Then base on these keys, move the player around the map
         keys = pygame.key.get_pressed()

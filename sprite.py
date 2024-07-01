@@ -1,8 +1,5 @@
 import pygame
 
-#The amount of frames for each set of animations (ex. walking takes 4 frames)
-frameSet = [2, 2, 2, 4, 4, 4]
-
 #Creates sprite animations. Takes any image file and cut up the files to get single images/frames.
 #getAnimations() = Takes a whole set of frames and insert them into the corresponding lists. 
 class Sprite():
@@ -20,7 +17,9 @@ class Sprite():
         self.walkRight = []
         self.walkBack = []
         #All inverted animations will be appended at the end
-        self. walkLeft = []
+        self.walkLeft = []
+        #The amount of frames for each set of animations (ex. walking takes 4 frames)
+        self.frameSet = [2, 2, 2, 4, 4, 4]
         #Final Animations in single list
         self.animations = [self.standFront, self.standRight, self.standBack, self.walkFront, self.walkRight, self.walkBack, self.walkLeft]
 
@@ -47,14 +46,14 @@ class Sprite():
 
         #Goes through frame set to collect the proper amount of frames per row
         #Ex. Walk Animation = 4 frames, Splice the image in a row 4 times
-        for set in frameSet:
+        for set in self.frameSet:
             for i in range(set):
                 self.animations[count].append(self.getFrame(i, 0, count * 32, 32, 32))
             count += 1
 
         #For inverted animations, such as walkLeft
         #Add the number of frames to frameSets to be tracked
-        frameSet.append(4) 
+        self.frameSet.append(4) 
         #Then loop through each walkRight frames and invert them horizontally for a walkRight
         for frame in self.walkRight:
             self.walkLeft.append(pygame.transform.flip(frame, True, False))
@@ -64,7 +63,7 @@ class Sprite():
     
     #Return the frameSet list
     def getFrameSet(self):
-        return frameSet
+        return self.frameSet
 
 #Attempt to move all animation methods in the sprite class
 #Currently not working as there is no way to track the ticks properly, as well as updating the currentFrame 
@@ -75,7 +74,7 @@ class Sprite():
             currentFrame += 1   
             previousTime = currentTime
         #When all frames are played, reset to the starting frame
-        if currentFrame >= frameSet[currentSet]:
+        if currentFrame >= self.frameSet[currentSet]:
             currentFrame = 0
         return (currentFrame, previousTime)
 

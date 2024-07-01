@@ -199,6 +199,7 @@ menu = level.menuScreen(win, gameStatus, [title_font, subtitle_font])
 end = level.gameEnd(win, gameStatus, [title_font, subtitle_font])
 shop = level.upgradeShop(win, gameStatus, [title_font, subtitle_font, instruction_font], char.speed, baseTime, 0)
 runLevel = level.runLevel(gameStatus)
+#All Cutscenes
 sceneOne = level.sceneOne(win, gameStatus, [name_font, instruction_font], animations, dialogue_animations)
 
 
@@ -228,10 +229,6 @@ while run:
             while len(collectPile) != 0:
                 collectPile.pop()
 
-    #Checks the current state. If it's a cutscene, then the variable
-    #collecitonMode will be set to false, allowing the cutscene to play instead
-    # if gameStatus.getState() != "runLevel":
-    #     level.collectionMode = False
     #Get the current gameStatus and check through the gameStates dictionary
     #When there is a match, run the given state
     gameStates[gameStatus.getState()].run()

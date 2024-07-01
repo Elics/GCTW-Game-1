@@ -141,7 +141,6 @@ class runLevel():
         self.gameStatus = gameStatus 
     def run(self):
         pass
-        #self.collectionMode = True
 
 # ~~Cutscenes~~
 class dialogueBox():
@@ -177,10 +176,12 @@ class sceneOne():
         testBox = dialogueBox(self.display, "black", self.dialogueSet, self.fontSet)
         textSet = ["Hello there!", "Let's go to the beach!"]
         textTwo = ["Hmm, it is pretty hard to find a spot"]
+        # testBox.setDialogue()
 
         if pygame.key.get_pressed()[pygame.K_SPACE] and len(textSet) - 1 > self.subcounter:
             self.subcounter += 1
         elif pygame.key.get_pressed()[pygame.K_SPACE] and len(textSet) - 1 == self.subcounter:
             self.gameStatus.setStatus("sceneOnept2")
+
 
         pygame.display.flip()

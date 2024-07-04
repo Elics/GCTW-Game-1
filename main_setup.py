@@ -202,7 +202,6 @@ runLevel = level.runLevel(gameStatus)
 #All Cutscenes
 sceneOne = level.sceneOne(win, gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
 
-
 #Add the states to the gameStates dictionary
 gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "runLevel":runLevel, "sceneOne":sceneOne} 
 

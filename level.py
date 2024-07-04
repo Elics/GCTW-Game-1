@@ -209,8 +209,8 @@ class sceneOne():
                 self.sceneMove = True
                 self.sceneText += 1
             testBox.setDialogue(currentTextSet, self.counter)
-        else:
-            self.gameStatus.setState("level")
+        elif len(dialogueSet) <= self.sceneText:
+            self.gameStatus.setState("runLevel")
             
         #Allow players to move when True
         if self.sceneMove == True:

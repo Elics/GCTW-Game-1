@@ -189,10 +189,10 @@ run = True
 
 #Spawn the initial set of trash in the map
 spawnTrash(5)
-
+ 
 #~~ Game Statuses ~~
 #Initialize the game status and play the starting screen first
-gameStatus = level.gameStatus("start")
+gameStatus = level.gameStatus("sceneOne")
 #Initialize all the states
 start = level.startGame(win, gameStatus, [title_font, instruction_font])
 menu = level.menuScreen(win, gameStatus, [title_font, subtitle_font])
@@ -200,7 +200,7 @@ end = level.gameEnd(win, gameStatus, [title_font, subtitle_font])
 shop = level.upgradeShop(win, gameStatus, [title_font, subtitle_font, instruction_font], char.speed, baseTime, 0)
 runLevel = level.runLevel(gameStatus)
 #All Cutscenes
-sceneOne = level.sceneOne(win, gameStatus, [name_font, instruction_font], animations, dialogue_animations)
+sceneOne = level.sceneOne(win, gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
 
 
 #Add the states to the gameStates dictionary

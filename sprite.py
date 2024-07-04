@@ -65,9 +65,9 @@ class Sprite():
     def getFrameSet(self):
         return self.frameSet
 
-#Attempt to move all animation methods in the sprite class
-#Currently not working as there is no way to track the ticks properly, as well as updating the currentFrame 
-#I will try to go back and optimize this portion later
+#Returns the currentFrame and previous tick time as a tuple. This method calculates the 
+#previous time spent on the last frame and update the current frame accordingly.
+#When all frames are shown, it will reset the current frame to 0, looping the animation again
     # #~~~ Update frame animation ~~~
     def frameTiming(self, currentTime, previousTime, frameCoolDown, currentFrame, currentSet):
         if currentTime - previousTime >= frameCoolDown:

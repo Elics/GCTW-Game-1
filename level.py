@@ -36,7 +36,7 @@ class startGame():
 
         if pygame.key.get_pressed()[pygame.K_SPACE]:
             pygame.time.delay(300)
-            self.gameStatus.setState("runLevel")
+            self.gameStatus.setState("sceneOne")
 
 #Menu Screen
 class menuScreen():
@@ -49,9 +49,11 @@ class menuScreen():
         self.display.fill("gray")
         title_txt = self.fontSet[0].render("MENU", True, "white")
         notice_txt = self.fontSet[1].render("Under Construction: Press Q to enter exit scene", True, "red")
+        notice2_txt = self.fontSet[1].render("Press M again to return", True, "red")
 
         self.display.blit(title_txt, (600, 300))
         self.display.blit(notice_txt, (200, 400))
+        self.display.blit(notice2_txt, (200, 500))
 
         pygame.display.flip()
 
@@ -167,7 +169,7 @@ class dialogueBox():
         
 
 class sceneOne():
-    def __init__(self, display, gameStatus, fontSet, animationSet, dialogueSet, playerClass, playerSheet, scale, windowDimensions):
+    def __init__(self, display, gameStatus, fontSet, animationSet, dialogueSet, playerClass, playerSheet, scale, windowDimensions, background):
         self.display = display
         self.gameStatus = gameStatus 
         self.fontSet = fontSet
@@ -180,28 +182,48 @@ class sceneOne():
         self.sceneText = 0
         self.width = windowDimensions[0]
         self.height = windowDimensions[1]
+        self.background = background
 
         #Animations for the scene
         self.currentFrame = 0
         self.counter = 0
-        self.previousTime = 0
+        self.previousTime = pygame.time.get_ticks()
         self.playerClass.x = 300
-        self.playerClass.y = 100
+        self.playerClass.y = 250
 
     def run(self):
-        self.display.fill("white")
-        NPCs = [pygame.Rect(600, 100, 100, 50)]
+        self.display.blit(self.background, (0 ,0))
+        NPCs = [pygame.Rect(600, 500, 100, 50)]
 
         #Set up Dialogue
         testBox = dialogueBox(self.display, "black", self.dialogueSet, self.fontSet)
-        textOne = ["Hello there!", "Let's go to the beach!"]
-        textTwo = ["Hmm, it is pretty hard to find a spot"]
-        dialogueSet = [textOne, textTwo]
+        textOne = ["Finally, after a long day I can relax on the beach.", "Let's find a good spot to lay down."]
+        textTwo = ["Hmm, it is pretty hard to find a spot", "Let's clean up a bit."]
+        dialogueList = [textOne, textTwo]
         
+        for NPC in NPCs:
+            pygame.draw.rect(self.display, "red", NPC)
+            
+        #Allow players to move when True
+        if self.sceneMove == True:
+            keys = pygame.key.get_pressed()
+            self.playerClass.movement(keys, self.width, self.height, 200)
 
+        #Idle Animation
+        currentSet = self.playerClass.currentSet
+        currentTime = pygame.time.get_ticks()
+        self.currentFrame = self.playerSheet.frameTiming(currentTime, self.previousTime, 200, self.currentFrame, currentSet)[0]
+        self.previousTime = self.playerSheet.frameTiming(currentTime, self.previousTime, 200, self.currentFrame, currentSet)[1]
+        self.playerClass.playerHitbox(self.scale)
+        self.display.blit(self.animationSet[currentSet][self.currentFrame], (self.playerClass.x, self.playerClass.y))
+
+        if pygame.Rect.collidelist(self.playerClass.hitbox, NPCs) != -1 and self.sceneMove == True:
+            self.sceneMove = False
+            self.counter = 0
+    
         #Loop through dialogue
-        if self.sceneMove == False and len(dialogueSet) > self.sceneText:
-            currentTextSet = dialogueSet[self.sceneText]
+        if self.sceneMove == False and len(dialogueList) > self.sceneText:
+            currentTextSet = dialogueList[self.sceneText]
             if pygame.key.get_pressed()[pygame.K_SPACE]:
                 pygame.time.delay(300)
                 self.counter += 1 
@@ -209,27 +231,7 @@ class sceneOne():
                 self.sceneMove = True
                 self.sceneText += 1
             testBox.setDialogue(currentTextSet, self.counter)
-        elif len(dialogueSet) <= self.sceneText:
+        elif len(dialogueList) <= self.sceneText:
             self.gameStatus.setState("runLevel")
-            
-        #Allow players to move when True
-        if self.sceneMove == True:
-            keys = pygame.key.get_pressed()
-            self.playerClass.movement(keys, self.width, self.height)
-
-        #Idle Animation
-        currentSet = self.playerClass.currentSet
-        currentTime = pygame.time.get_ticks()
-        self.currentFrame = self.playerSheet.frameTiming(currentTime, self.previousTime, 250, self.currentFrame, currentSet)[0]
-        self.previousTime = self.playerSheet.frameTiming(currentTime, self.previousTime, 250, self.currentFrame, currentSet)[1]
-        self.playerClass.playerHitbox(self.scale)
-        self.display.blit(self.animationSet[currentSet][self.currentFrame], (self.playerClass.x, self.playerClass.y))
-
-        if pygame.Rect.collidelist(self.playerClass.hitbox, NPCs) != -1 and self.sceneMove == True:
-            self.sceneMove = False
-            self.counter = 0
-        
-        for NPC in NPCs:
-            pygame.draw.rect(self.display, "red", NPC)
 
         pygame.display.flip()

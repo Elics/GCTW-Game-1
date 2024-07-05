@@ -22,7 +22,7 @@ pygame.display.set_caption("Our Game")
 #~~~ Global Variables ~~~
 char_x = 0 #winWidth * 0.5
 char_y = 0 #winHeight * 0.65
-char_s = 10 #Character Speed
+char_s = 15 #Character Speed
 scale = 6 #Scale of character
 #Stores all the surfaces/trash sprites
 trashPile = []
@@ -50,7 +50,7 @@ pygame.time.set_timer(stage_event, 1000)
 #~~ Player Initialization ~~
 #(x, y, width, height, speed)
 #Add a sprite sheet to create the player
-char_sheet = sprite.Sprite("NPC.png", scale)
+char_sheet = sprite.Sprite("photo\\NPC.png", scale)
 #Frame Number, X, Y, Width, Height, Scale
 #Take a single frame from the sprite sheet to obtain dimensions
 char_frame = char_sheet.getFrame(0, 0, 0, 32, 32)
@@ -62,21 +62,25 @@ char = player.Player(char_x, char_y, char_w, char_h, char_s)
 char.playerHitbox(scale)
 
 #Scaled up character for dialogue
-char_dialogue_sheet = sprite.Sprite("NPC.png", 10)
+char_dialogue_sheet = sprite.Sprite("photo\\NPC.png", 10)
 dialogue_animations = char_dialogue_sheet.getAnimations()
 
 #~~ Animations Variables ~~ 
 animations = char_sheet.getAnimations()
 previousTime = pygame.time.get_ticks()
 frameSet = char_sheet.getFrameSet()
-frameCoolDown = 250
+frameCoolDown = 200
 currentSet = 0
 currentFrame = 0
-
 
 #Setup Window Boundaries based on player's hitbox
 widthBoundary =  winWidth - char.hitbox[2] - char_s
 heightBoundary = winHeight - char.hitbox[3]- char_s
+
+# ~~Backgrounds~~
+beach_bg = pygame.image.load("photo\\beach.png")
+beach_bg = pygame.transform.scale(beach_bg, (1000, 600))
+beach_bg_bound = 200
 
 #~~~ Messages/Fonts ~~~
 #Don't know what fonts you have? Run this line below
@@ -105,23 +109,23 @@ upgradeList = [char.speed, baseTime]
 
 #~~~ Functions ~~~ 
 #Create and add trash objects to trashPile. Additionally add their hitboxes to trashHitboxes
-def spawnTrash(amount):
+def spawnTrash(amount, widthBoundary, heightLowerBoundary, heightUpperBoundary):
     for i in range(amount):
-        trashPile.append(trash.Trash(char.hitbox[2], char.hitbox[3], char_s, widthBoundary, heightBoundary))
+        trashPile.append(trash.Trash(char.hitbox[2], char.hitbox[3], heightLowerBoundary, widthBoundary, heightUpperBoundary))
 
     for i in trashPile:
         trashHitboxes.append(i.hitbox)
 
 #Checks the collision between trash objects and the player
 #When they collide, replace with a new trash object, which will change shape and spawn location
-def collectTrash(player_hitbox):
+def collectTrash(player_hitbox, widthBoundary, heightLowerBoundary, heightUpperBoundary):
     #Get the index of the trash object that been hit by the player's hitbox base on the trashHitboxes list.
     #Returns -1 if nothing been hit yet
     collectTrash = player_hitbox.collidelist(trashHitboxes)
     if collectTrash != -1:
         #Create a new trash object with proportions based on player's hitbox
         # playerWidth, playerHeight, playerSpeed, window width, window height
-        newTrash = trash.Trash(char.hitbox[2], char.hitbox[3], char_s, widthBoundary, heightBoundary)
+        newTrash = trash.Trash(char.hitbox[2], char.hitbox[3], heightLowerBoundary, widthBoundary, heightUpperBoundary)
         
         #To track score, I currently have a list. 
         #Everytime a trash been collected, it will be tallied in this list
@@ -140,9 +144,11 @@ def collectTrash(player_hitbox):
         trashHitboxes[collectTrash] = newTrash.hitbox
 
 #Update the game window with new animations/movement
-def redrawGameWindow():
+def redrawGameWindow(widthBoundary, heightLowerBoundary, heightUpperBoundary):
     #Load/Update Background
-    win.fill("white")
+
+    #NOTE: When there are multiple levels, create a list/if-else to load proper backgrounds per level
+    win.blit(beach_bg, (0,0))
 
     #Load trash that exists in trashPile
     for trash in trashPile:
@@ -175,7 +181,7 @@ def redrawGameWindow():
     win.blit(animations[currentSet][currentFrame], (char.x, char.y))
 
     #Check collision and update trash lists accordingly
-    collectTrash(char.hitbox)
+    collectTrash(char.hitbox, widthBoundary, heightLowerBoundary, heightUpperBoundary)
    
 
     #Update/Finalize all changes made
@@ -188,11 +194,11 @@ def redrawGameWindow():
 run = True
 
 #Spawn the initial set of trash in the map
-spawnTrash(5)
+spawnTrash(5, widthBoundary, beach_bg_bound, heightBoundary)
  
 #~~ Game Statuses ~~
 #Initialize the game status and play the starting screen first
-gameStatus = level.gameStatus("sceneOne")
+gameStatus = level.gameStatus("start")
 #Initialize all the states
 start = level.startGame(win, gameStatus, [title_font, instruction_font])
 menu = level.menuScreen(win, gameStatus, [title_font, subtitle_font])
@@ -200,7 +206,7 @@ end = level.gameEnd(win, gameStatus, [title_font, subtitle_font])
 shop = level.upgradeShop(win, gameStatus, [title_font, subtitle_font, instruction_font], char.speed, baseTime, 0)
 runLevel = level.runLevel(gameStatus)
 #All Cutscenes
-sceneOne = level.sceneOne(win, gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
+sceneOne = level.sceneOne(win, gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary), beach_bg)
 
 #Add the states to the gameStates dictionary
 gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "runLevel":runLevel, "sceneOne":sceneOne} 
@@ -243,6 +249,7 @@ while run:
         #If Q is pressed, return the End Screen
     if pygame.key.get_pressed()[pygame.K_q] and gameStatus.getState() == "menu":
         gameStatus.setState("end")
+        
         
     #Shop interface/Interaction
     #Get the index to the upgrade from the upgradeList
@@ -306,7 +313,7 @@ while run:
         #Get the user's input, specifically which keys they pressed
         #Then base on these keys, move the player around the map
         keys = pygame.key.get_pressed()
-        char.movement(keys, widthBoundary, heightBoundary)
+        char.movement(keys, widthBoundary, heightBoundary, beach_bg_bound)
         currentSet = char.currentSet
 
         #~~ Running Animations in Main Loop ~~
@@ -320,7 +327,7 @@ while run:
         previousTime = char_sheet.frameTiming(currentTime, previousTime, frameCoolDown, currentFrame, currentSet)[1]
 
         #Update the window
-        scoreCoinList = redrawGameWindow()
+        scoreCoinList = redrawGameWindow(widthBoundary, beach_bg_bound, heightBoundary)
 
         #Update Shop Coin Display
         shop.coins = scoreCoinList[1]

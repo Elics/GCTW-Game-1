@@ -28,7 +28,7 @@ class Player():
 
     #Changes the x and y coordinates of the player. 
     #Requires the current key input, the width boundary and the height boundary of the window
-    def movement(self, keys, widthBounds, heightBounds):
+    def movement(self, keys, widthBounds, heightBounds, backgroundHeight):
         #Checks the key and moves the character correspondingly
             if keys[pygame.K_a] and self.hitbox[0] > self.speed :
                 self.x -= self.speed
@@ -44,7 +44,7 @@ class Player():
                 self.down = False
                 self.up = False
                 self.currentSet = 4
-            elif keys[pygame.K_w] and self.hitbox[1] > self.speed:
+            elif keys[pygame.K_w] and self.hitbox[1] > backgroundHeight:
                 self.y -= self.speed
                 self.left = False
                 self.right = False

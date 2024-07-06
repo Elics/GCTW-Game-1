@@ -10,10 +10,11 @@ screen= pygame.display.set_mode((SCREENWIDTH,SCREENHEIGHT))
 pygame.display.set_caption("First Game")
 
 #images
-walkRight = [pygame.image.load('R1.png'), pygame.image.load('R2.png'), pygame.image.load('R3.png'), pygame.image.load('R4.png')]
-walkLeft = [pygame.image.load('L1.png'), pygame.image.load('L2.png'), pygame.image.load('L3.png'), pygame.image.load('L4.png')]
-bg = pygame.image.load('bg.jpg')
-char = pygame.image.load('standing.png')
+walkRight = [pygame.image.load('Images/Collectors/R1.png'), pygame.image.load('Images/Collectors/R2.png'), pygame.image.load('Images/Collectors/R3.png'), pygame.image.load('Images/Collectors/R4.png')]
+walkLeft = [pygame.image.load('Images/Collectors/L1.png'), pygame.image.load('Images/Collectors/L2.png'), pygame.image.load('Images/Collectors/L3.png'), pygame.image.load('Images/Collectors/L4.png')]
+bg = pygame.image.load('Images/Backgrounds/bg.jpg')
+
+char = pygame.image.load('Images/Collectors/standing.png')
 
 clock = pygame.time.Clock()
 

@@ -3,7 +3,7 @@ import random
 from cut_scene import IntroCutScene, LevelCompletedCutScene
 from trash import Trash
 from collector import Collector
-from menu import draw_menu, draw_options
+from menu import Menu
 
 pygame.init()
 
@@ -15,12 +15,13 @@ pygame.display.set_caption("First Game")
 # Images
 walkRight = [pygame.image.load('Images/Collectors/R1.png'), pygame.image.load('Images/Collectors/R2.png'), pygame.image.load('Images/Collectors/R3.png'), pygame.image.load('Images/Collectors/R4.png')]
 walkLeft = [pygame.image.load('Images/Collectors/L1.png'), pygame.image.load('Images/Collectors/L2.png'), pygame.image.load('Images/Collectors/L3.png'), pygame.image.load('Images/Collectors/L4.png')]
-bg = pygame.image.load('Images/Backgrounds/bg.jpg')
+bg = pygame.image.load('Images/Backgrounds/Field 1.png')
 
 # Load and scale images
 BananaSkin = pygame.image.load('Images/Trashes/BananaSkin.png').convert_alpha()
 BananaSkin = pygame.transform.scale(BananaSkin, (25, 25))  # Scale the image to desired size
 
+# Initialize Trash Group
 trash_group = pygame.sprite.Group()
 for _ in range(8):
     trash = Trash((random.randint(0, SCREENWIDTH - 25), random.randint(0, SCREENHEIGHT - 25)), BananaSkin)
@@ -48,12 +49,12 @@ def redrawGameWindow():
     for trash in trash_group:
         trash.draw(screen)
     pygame.display.update()
-    return menu_text.get_rect(topleft=(10, 10))
 
 # Main game loop
 running = True
 man = Collector(210, 410, 64, 64, walkRight, walkLeft)
-game_state = "play"
+menu = Menu(screen, font)
+game_state = "cutscene"
 intro_cutscene = IntroCutScene(screen, font)
 level_completed_cutscene = LevelCompletedCutScene(screen, font)
 
@@ -63,30 +64,35 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
-    if game_state == 'cutscene':
-        if not intro_cutscene.update():
-            game_state = 'menu'
-        intro_cutscene.draw()
-    elif game_state == 'menu':
-        play_button_rect, options_button_rect, quit_button_rect = draw_menu(screen, font)
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if game_state == 'menu':
+                play_button_rect, options_button_rect, quit_button_rect = menu.draw_menu()
                 if play_button_rect.collidepoint(event.pos):
                     game_state = "play"
                 elif options_button_rect.collidepoint(event.pos):
                     game_state = "options"
                 elif quit_button_rect.collidepoint(event.pos):
                     running = False
-    elif game_state == "play":
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if redrawGameWindow().collidepoint(event.pos):
+            elif game_state == "play":
+                menu_text_rect = pygame.Rect(10, 10, 50, 50)
+                if menu_text_rect.collidepoint(event.pos):
+                    game_state = 'menu'
+            elif game_state == 'options':
+                back_button_rect = menu.draw_options()
+                if back_button_rect.collidepoint(event.pos):
                     game_state = 'menu'
 
+    if game_state == 'cutscene':
+        if not intro_cutscene.update():
+            game_state = 'menu'
+        intro_cutscene.draw()
+    elif game_state == 'menu':
+        menu.draw_menu()
+    elif game_state == "play":
         man.update()
         for trash in trash_group:
             if man.rect.colliderect(trash.rect):
+                trash.hit()
                 trash.kill()
                 score += 10
 
@@ -94,12 +100,6 @@ while running:
             game_state = 'level_completed'
 
         redrawGameWindow()
-    elif game_state == 'options':
-        back_button_rect = draw_options(screen, font)
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if back_button_rect.collidepoint(event.pos):
-                    game_state = 'menu'
     elif game_state == "level_completed":
         if not level_completed_cutscene.update():
             game_state = 'menu'

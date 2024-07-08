@@ -53,6 +53,7 @@ class Sprite():
 
         return self.animations
     
+    #Get the inverted version of animations sets
     def getInvertedAnimations(self, frameNumber, animationNumber, copiedNumber):
         #For inverted animations, such as walkLeft
         #Add the number of frames to frameSets to be tracked

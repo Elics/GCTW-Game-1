@@ -28,35 +28,46 @@ class Player():
 
     #Changes the x and y coordinates of the player. 
     #Requires the current key input, the width boundary and the height boundary of the window
+    #Sets the animation to run as well depending on what key is pressed
     def movement(self, keys, widthBounds, heightBounds, backgroundHeight):
         #Checks the key and moves the character correspondingly
-            if keys[pygame.K_a] and self.hitbox[0] > self.speed :
-                self.x -= self.speed
-                self.left = False
-                self.right = True
-                self.down = False
-                self.up = False
-                self.currentSet = 6
-            elif keys[pygame.K_d] and self.hitbox[0] < widthBounds:
-                self.x += self.speed
-                self.left = True
-                self.right = False
-                self.down = False
-                self.up = False
-                self.currentSet = 4
-            elif keys[pygame.K_w] and self.hitbox[1] > backgroundHeight:
-                self.y -= self.speed
-                self.left = False
-                self.right = False
-                self.down = True
-                self.up = False
-                self.currentSet = 5
-            elif keys[pygame.K_s] and self.hitbox[1] < heightBounds:
-                self.y += self.speed
-                self.left = False
-                self.right = False
-                self.down = False
-                self.up = True
-                self.currentSet = 3
-            else:
-                self.currentSet = 0
+
+        #Left
+        if keys[pygame.K_a] and self.hitbox[0] > self.speed :
+            self.x -= self.speed
+            self.left = False
+            self.right = True
+            self.down = False
+            self.up = False
+            self.currentSet = 6
+
+        #Right
+        elif keys[pygame.K_d] and self.hitbox[0] < widthBounds:
+            self.x += self.speed
+            self.left = True
+            self.right = False
+            self.down = False
+            self.up = False
+            self.currentSet = 4
+        
+        #Down
+        elif keys[pygame.K_w] and self.hitbox[1] > backgroundHeight:
+            self.y -= self.speed
+            self.left = False
+            self.right = False
+            self.down = True
+            self.up = False
+            self.currentSet = 5
+
+        #Up
+        elif keys[pygame.K_s] and self.hitbox[1] < heightBounds:
+            self.y += self.speed
+            self.left = False
+            self.right = False
+            self.down = False
+            self.up = True
+            self.currentSet = 3
+
+        #Idle Animation
+        else:
+            self.currentSet = 0

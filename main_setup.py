@@ -145,7 +145,7 @@ def collectTrash(player_hitbox, widthLowerBoundary, widthUpperBoundary, heightLo
         # playerWidth, playerHeight, playerSpeed, window width, window height
         newTrash = trash.Trash(char.hitbox[2], char.hitbox[3], widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary)
         
-        #To track score, I currently have a list. 
+        #NOTE: To track score, I currently have a list. 
         #Everytime a trash been collected, it will be tallied in this list
         #I need to find a way to replace this method, wastes resources
         if trashPile[collectTrash].treasure == 1:

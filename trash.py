@@ -5,11 +5,11 @@ import random
 #The trash object should be smaller than the player
 #widthBound and heightBound are the window boundaries. These dictate where the trash can spawn
 class Trash():
-    def __init__(self, playerWidth, playerHeight, playerSpeed, widthBound, heightBound):
+    def __init__(self, playerWidth, playerHeight, widthLowerBound, widthUpperBound, heightLowerBound, heightUpperBound):
         self.width = random.randint(20, playerWidth - 20)
         self.height =  random.randint(20, playerHeight - 20)
-        self.x = random.randint(playerSpeed, widthBound)
-        self.y = random.randint(playerSpeed, heightBound)
+        self.x = random.randint(widthLowerBound, widthUpperBound)
+        self.y = random.randint(heightLowerBound, heightUpperBound)
         self.hitbox = pygame.Rect(self.x, self.y, self.width, self.height)
         #Chances of the trash being treasure (1/5 or 20%)
         self.treasure = random.randint(1, 5)

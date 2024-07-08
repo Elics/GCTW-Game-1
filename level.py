@@ -84,7 +84,7 @@ class upgradeShop():
         coins_txt = self.fontSet[1].render("Coins: " + str(self.coins), False, "black")
         speedUpgrade_txt = self.fontSet[1].render("Speed +10", False, "black")
         timeUpgrade_txt = self.fontSet[1].render("Time +10", False, "black")
-        skip_txt = self.fontSet[1].render("Skip Upgrades", False, "Red")
+        skip_txt = self.fontSet[1].render("Next Level", False, "Red")
 
         #Render the Shop Text & Instructions
         self.display.blit(title_txt, (400, 0))
@@ -93,6 +93,7 @@ class upgradeShop():
         self.display.blit(instructions_txt, (50, 550))
 
         #When a button is selected, highlight its corresponding rectangle
+        #Each upgrade button corresponds to an integer
         if (self.selected == 0):
             pygame.draw.rect(self.display, "pink", speedRect)
         else:

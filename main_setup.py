@@ -44,9 +44,10 @@ pygame.time.set_timer(stage_event, 1000)
 
 #~~ Player Initialization ~~
 #Add a sprite sheet to create the player
-char_sheet = sprite.Sprite("photo\\NPC.png", scale)
-#Frame Number, X, Y, Width, Height, Scale
+#File Name, Scale, Number of frames per animation, Total number of animations
+char_sheet = sprite.Sprite("photo\\NPC.png", scale, [2, 2, 2, 4, 4, 4], 7)
 #Take a single frame from the sprite sheet to obtain dimensions
+#Frame Number, X, Y, Width, Height
 char_frame = char_sheet.getFrame(0, 0, 0, 32, 32)
 char_w = char_frame.get_width()
 char_h = char_frame.get_height()
@@ -56,17 +57,19 @@ char = player.Player(char_x, char_y, char_w, char_h, char_s)
 #Initialize player's hitbox
 char.playerHitbox(scale)
 
-#Scaled up character for dialogue
-char_dialogue_sheet = sprite.Sprite("photo\\NPC.png", 10)
-dialogue_animations = char_dialogue_sheet.getAnimations()
-
 #~~ Animations Variables ~~
 #Get a whole list of animations (walking, idle, etc.)
 animations = char_sheet.getAnimations()
+#For inverted animations (walking left)
+#Number of frames, Index of the animation to copy, Index of the empty set to transfer the animation
+animations = char_sheet.getInvertedAnimations(4, 4, 6)
+
+#Scaled up character for dialogue
+char_dialogue_sheet = sprite.Sprite("photo\\NPC.png", 10, [2, 2, 2, 4, 4, 4], 6)
+dialogue_animations = char_dialogue_sheet.getAnimations()
+
 #Track the time of the previous frame played
 previousTime = pygame.time.get_ticks()
-#Get the number of frames for each animation (walking = 4 frames, idle = 2 frames, etc.)
-frameSet = char_sheet.getFrameSet()
 #Time between frames, FPS
 frameCoolDown = 200
 #Tracks the current animation being played

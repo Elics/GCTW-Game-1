@@ -10,11 +10,13 @@ pygame.init()
 
 #~~~ Create Game Window ~~~
 #Window Dimension variables
-winWidth = 1000
-winHeight = 600
+windowSizes = [(800, 600), (1000, 600), (1200, 700)]
+screenSizeIndex = 1
+winWidth = windowSizes[1][0]
+winHeight = windowSizes[1][1]
 
 #Initialize window 
-win = pygame.display.set_mode((winWidth, winHeight))
+win = pygame.display.set_mode(windowSizes[1])
 
 #Create name of the window
 pygame.display.set_caption("Our Game")
@@ -221,7 +223,7 @@ spawnTrash(5, char.speed, widthBoundary, beach_bg_bound, heightBoundary)
  
 #~~ Game Statuses ~~
 #Initialize the game status and play the starting screen first
-gameStatus = level.gameStatus("start")
+gameStatus = level.gameStatus("menu")
 
 #Initialize all the states
 #NOTE: Fonts are placed in a list
@@ -274,9 +276,17 @@ while run:
         else:
             gameStatus.setState(gameStatus.getPreviousState())
     #If Q is pressed, return the End Screen
-    if pygame.key.get_pressed()[pygame.K_q] and gameStatus.getState() == "menu":
-        gameStatus.setState("end")
-        
+    if gameStatus.getState() == "menu":
+        if pygame.key.get_pressed()[pygame.K_q]: 
+            gameStatus.setState("end")
+            
+        #TESTING WINDOW SIZING OPTION TOGGLE
+        elif pygame.key.get_pressed()[pygame.K_h]:
+            if screenSizeIndex + 1< len(windowSizes):
+                screenSizeIndex += 1
+            else:
+                screenSizeIndex = 0
+            win = pygame.display.set_mode(windowSizes[screenSizeIndex])
         
     #~~ Shop Interface ~~
     #Get the index to the upgrade from the upgradeList

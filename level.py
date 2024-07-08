@@ -2,16 +2,20 @@
 #Each level or cutscene, which will be called states, is defined in its own class
 import pygame
 
+#NOTE: Add a way to track already played scenes/levels
+
 #Sets the game status, return the current status, and set the status
 class gameStatus():
     def __init__(self, currentState):
         self.currentState = currentState
         self.previousState = currentState
+
     def getState(self):
         return self.currentState
     def setState(self, changeState):
         self.currentState = changeState
-    #Question methods to retrieve previous state
+
+    #Retrieve the previous state called for the menu
     def setPreviousState(self):
         self.previousState = self.currentState
     def getPreviousState(self):
@@ -44,16 +48,30 @@ class menuScreen():
         self.display = display
         self.gameStatus = gameStatus
         self.fontSet = fontSet
+        self.select = None
 
     def run(self):
         self.display.fill("gray")
+
+        #Buttons
+
+
+        #Text
         title_txt = self.fontSet[0].render("MENU", True, "white")
         notice_txt = self.fontSet[1].render("Under Construction: Press Q to enter exit scene", True, "red")
         notice2_txt = self.fontSet[1].render("Press M again to return", True, "red")
+        screensize_txt = self.fontSet[1].render("Screen Size: ", True, "white")
 
-        self.display.blit(title_txt, (600, 300))
-        self.display.blit(notice_txt, (200, 400))
-        self.display.blit(notice2_txt, (200, 500))
+
+        #Render Text
+        self.display.blit(title_txt, (400, 0))
+        self.display.blit(notice_txt, (100, 100))
+        self.display.blit(notice2_txt, (100, 200))
+        self.display.blit(screensize_txt, (100, 500))
+        
+        #Render Buttons
+        # if (self.selected == 0):
+        #     pass
 
         pygame.display.flip()
 

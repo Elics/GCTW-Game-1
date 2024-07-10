@@ -4,6 +4,10 @@ import pygame
 
 #NOTE: Add a way to track already played scenes/levels
 
+#~~ Background Images ~~
+menu_bg = pygame.image.load("photo\\Menu.png")
+# menu_bg = pygame.transform.scale(menu_bg, (winWidth, winHeight))
+
 #Sets the game status, return the current status, and set the status
 class gameStatus():
     def __init__(self, currentState):
@@ -51,23 +55,13 @@ class menuScreen():
         self.select = None
 
     def run(self):
-        self.display.fill("gray")
+        self.display.blit(menu_bg, (0,0))
 
         #Buttons
 
-
         #Text
-        title_txt = self.fontSet[0].render("MENU", True, "white")
-        notice_txt = self.fontSet[1].render("Under Construction: Press Q to enter exit scene", True, "red")
-        notice2_txt = self.fontSet[1].render("Press M again to return", True, "red")
-        screensize_txt = self.fontSet[1].render("Screen Size: ", True, "white")
-
 
         #Render Text
-        self.display.blit(title_txt, (400, 0))
-        self.display.blit(notice_txt, (100, 100))
-        self.display.blit(notice2_txt, (100, 200))
-        self.display.blit(screensize_txt, (100, 500))
         
         #Render Buttons
         # if (self.selected == 0):

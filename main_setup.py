@@ -4,22 +4,14 @@ import player
 import trash
 import sprite
 import level
+import window
 
 #Initialize pygame program
 pygame.init()
 
-#~~~ Create Game Window ~~~
-#Window Dimension variables
-windowSizes = [(800, 600), (1000, 600), (1200, 700)]
-screenSizeIndex = 1
-winWidth = windowSizes[1][0]
-winHeight = windowSizes[1][1]
-
-#Initialize window 
-win = pygame.display.set_mode(windowSizes[1])
-
-#Create name of the window
-pygame.display.set_caption("Our Game")
+#Initialize window and set name of the window
+win = window.Window("Earthy")
+win.addBackground("photo\\beach.png", 200)
 
 #~~ Player Initialization Variables ~~
 #Player's Initial X & Y Coordinates
@@ -81,14 +73,8 @@ currentFrame = 0
 
 #~~ Player Boundaries ~~
 #Setup upper boundaries based on player's hitbox
-widthBoundary =  winWidth - char.hitbox[2] - char_s
-heightBoundary = winHeight - char.hitbox[3]- char_s
-
-#~~ Image Backgrounds ~~
-#Level 1: Beach Theme
-beach_bg = pygame.image.load("photo\\beach.png")
-beach_bg = pygame.transform.scale(beach_bg, (1000, 600))
-beach_bg_bound = 200 #Height Lower Bound; Sand Area
+widthBoundary =  win.winWidth - char.hitbox[2] - char_s
+heightBoundary = win.winHeight - char.hitbox[3]- char_s
 
 #~~~ Messages/Fonts ~~~
 #Don't know what fonts you have? Run this line below
@@ -172,37 +158,37 @@ def redrawGameWindow(levelNumber, widthLowerBoundary, widthUpperBoundary, height
     #Load/Update Background
     #NOTE: When there are multiple levels, create a list/if-else to load proper backgrounds per level
     if levelNumber == 1:
-        win.blit(beach_bg, (0,0))
+        win.currentWindow.blit(win.backgroundList[0][0], (0,0))
 
     #Draw the trash that exists in trashPile
     for trash in trashPile:
         if trash.treasure == 1:
-            pygame.draw.rect(win, "blue", trash.hitbox)
+            pygame.draw.rect(win.currentWindow, "blue", trash.hitbox)
         else:    
-            pygame.draw.rect(win, "red", trash.hitbox)
+            pygame.draw.rect(win.currentWindow, "red", trash.hitbox)
 
     #Display the score
     score = len(collectPile)
     score_txt = score_font.render("Collected: " + str(score), True, "black")
     stageCounter_txt = score_font.render(str(stageCounter), True, "black")
-    win.blit(score_txt, (10, winHeight-50))
-    win.blit(stageCounter_txt, (0,0))
+    win.currentWindow.blit(score_txt, (10, win.winHeight-50))
+    win.currentWindow.blit(stageCounter_txt, (0,0))
 
     #Display coins
     totalCoins = sum(coinsList)
     coin_txt = score_font.render("Coins: " + str(totalCoins), True, "black")
-    win.blit(coin_txt, (800, winHeight-50))
+    win.currentWindow.blit(coin_txt, (800, win.winHeight-50))
 
 
     #Load the player/Update player's movement
     char.playerHitbox(scale)
 
     #Player Hitbox testing
-    # pygame.draw.rect(win, "red", char.hitbox)
-    # win.blit(char_frame, (char.x, char.y))
+    # pygame.draw.rect(win.currentWindow, "red", char.hitbox)
+    # win.currentWindow.blit(char_frame, (char.x, char.y))
 
      #Show frame
-    win.blit(animations[currentSet][currentFrame], (char.x, char.y))
+    win.currentWindow.blit(animations[currentSet][currentFrame], (char.x, char.y))
 
     #Check collision and update trash lists accordingly
     collectTrash(char.hitbox, widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary)
@@ -219,22 +205,22 @@ run = True
 
 #Spawn the initial set of trash in the map
 #Spawn Location Dimensions (estimated): X:15-950; Y:200-550
-spawnTrash(5, char.speed, widthBoundary, beach_bg_bound, heightBoundary)
+spawnTrash(5, char.speed, widthBoundary, win.backgroundList[0][1], heightBoundary)
  
 #~~ Game Statuses ~~
 #Initialize the game status and play the starting screen first
-gameStatus = level.gameStatus("menu")
+gameStatus = level.gameStatus("start")
 
 #Initialize all the states
 #NOTE: Fonts are placed in a list
-start = level.startGame(win, gameStatus, [title_font, instruction_font])
-menu = level.menuScreen(win, gameStatus, [title_font, subtitle_font])
-end = level.gameEnd(win, gameStatus, [title_font, subtitle_font])
-shop = level.upgradeShop(win, gameStatus, [title_font, subtitle_font, instruction_font], char.speed, baseTime, 0)
+start = level.startGame(win.currentWindow, gameStatus, [title_font, instruction_font])
+menu = level.menuScreen(win.currentWindow, gameStatus, [title_font, subtitle_font])
+end = level.gameEnd(win.currentWindow, gameStatus, [title_font, subtitle_font])
+shop = level.upgradeShop(win.currentWindow, gameStatus, [title_font, subtitle_font, instruction_font], char.speed, baseTime, 0)
 runLevel = level.runLevel(gameStatus)
 
 #All Cutscenes
-sceneOne = level.sceneOne(win, gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary), beach_bg)
+sceneOne = level.sceneOne(win.currentWindow, gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary), win.backgroundList[0][0])
 
 #Add the states to the gameStates dictionary
 #This allows the gameStatus class to know which state to call
@@ -279,14 +265,14 @@ while run:
     if gameStatus.getState() == "menu":
         if pygame.key.get_pressed()[pygame.K_q]: 
             gameStatus.setState("end")
-            
+
         #TESTING WINDOW SIZING OPTION TOGGLE
         elif pygame.key.get_pressed()[pygame.K_h]:
-            if screenSizeIndex + 1< len(windowSizes):
-                screenSizeIndex += 1
+            if win.screenSizeIndex + 1< len(win.windowSizes):
+                win.screenSizeIndex += 1
             else:
-                screenSizeIndex = 0
-            win = pygame.display.set_mode(windowSizes[screenSizeIndex])
+                win.screenSizeIndex = 0
+            win.setWindow()
         
     #~~ Shop Interface ~~
     #Get the index to the upgrade from the upgradeList
@@ -331,21 +317,21 @@ while run:
                 #If the player does not have enough coins for the upgrade
                 else:
                     lessCoins_txt = subtitle_font.render("Not enough coins for next upgrade level!", True, "blue")
-                    win.blit(lessCoins_txt, (250, 250))
+                    win.currentWindow.blit(lessCoins_txt, (250, 250))
                     pygame.display.flip()
                     pygame.time.delay(500)
 
             #If the player reached max upgrade on any item
             elif upgradeList[upgradeIndex] >= 60:
                 maxUpgradeReach_txt = subtitle_font.render("Max Upgrade Reached!", True, "blue")
-                win.blit(maxUpgradeReach_txt, (350, 250))
+                win.currentWindow.blit(maxUpgradeReach_txt, (350, 250))
                 pygame.display.flip()
                 pygame.time.delay(500)
 
             #If the player has 0 coins 
             else:
                 noCoins_txt = subtitle_font.render("You have no coins!", True, "blue")
-                win.blit(noCoins_txt, (350, 250))
+                win.currentWindow.blit(noCoins_txt, (350, 250))
                 pygame.display.flip()
                 pygame.time.delay(500)
         
@@ -354,7 +340,7 @@ while run:
         #Get the user's input, specifically which keys they pressed
         #Then base on these keys, move the player around the map
         keys = pygame.key.get_pressed()
-        char.movement(keys, widthBoundary, heightBoundary, beach_bg_bound)
+        char.movement(keys, widthBoundary, heightBoundary, win.backgroundList[0][1])
         #Return the current animation set that the player toggled based on the movement method
         currentSet = char.currentSet
 
@@ -369,7 +355,7 @@ while run:
         previousTime = char_sheet.frameTiming(currentTime, previousTime, frameCoolDown, currentFrame, currentSet)[1]
 
         #Update the window and return the score and coin list
-        scoreCoinList = redrawGameWindow(1, char.speed, widthBoundary, beach_bg_bound, heightBoundary)
+        scoreCoinList = redrawGameWindow(1, char.speed, widthBoundary, win.backgroundList[0][1], heightBoundary)
 
         #Update Shop Coin Display
         shop.coins = scoreCoinList[1]

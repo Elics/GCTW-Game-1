@@ -10,8 +10,9 @@ import window
 pygame.init()
 
 #Initialize window and set name of the window
-win = window.Window("Earthy")
-win.addBackground("photo\\beach.png", 200)
+win = window.Window("Our Earth")
+#Add backgrounds for the LEVELS
+win.addBackground("images\\backgrounds\\Beach.png", 200)
 
 #~~ Player Initialization Variables ~~
 #Player's Initial X & Y Coordinates
@@ -39,7 +40,7 @@ pygame.time.set_timer(stage_event, 1000)
 #~~ Player Initialization ~~
 #Add a sprite sheet to create the player
 #File Name, Scale, Number of frames per animation, Total number of animations
-char_sheet = sprite.Sprite("photo\\NPC.png", scale, [2, 2, 2, 4, 4, 4], 7)
+char_sheet = sprite.Sprite("images\\characters\\tempPlayer.png", scale, [2, 2, 2, 4, 4, 4], 7)
 #Take a single frame from the sprite sheet to obtain dimensions
 #Frame Number, X, Y, Width, Height
 char_frame = char_sheet.getFrame(0, 0, 0, 32, 32)
@@ -59,7 +60,7 @@ animations = char_sheet.getAnimations()
 animations = char_sheet.getInvertedAnimations(4, 4, 6)
 
 #Scaled up character for dialogue
-char_dialogue_sheet = sprite.Sprite("photo\\NPC.png", 10, [2, 2, 2, 4, 4, 4], 6)
+char_dialogue_sheet = sprite.Sprite("images\\characters\\tempPlayer.png", 10, [2, 2, 2, 4, 4, 4], 6)
 dialogue_animations = char_dialogue_sheet.getAnimations()
 
 #Track the time of the previous frame played
@@ -93,7 +94,7 @@ name_font = pygame.font.SysFont('Nunito', 40, True)
 #Index to loop through available upgrades
 upgradeIndex = 0
 #A list to store all coin values collected
-coinsList = []
+coinsList = [10]
 #A List of all Upgrades
  #Upgrades
     # char.speed += 10
@@ -138,11 +139,11 @@ def collectTrash(player_hitbox, widthLowerBoundary, widthUpperBoundary, heightLo
         #I need to find a way to replace this method, wastes resources
         if trashPile[collectTrash].treasure == 1:
         #If trash has treasure attribute: 10+ Coins, 5+ Points
-            coinsList.append(10)
+            coinsList[0] = coinsList[0] + 10
             collectPile.append(5)
         else:
         #Normal Trash: 2+ Coints, 1+ Points
-            coinsList.append(2)
+            coinsList[0] = coinsList[0] + 2
             collectPile.append(1)
 
         #Replace the current trash object with the new one
@@ -175,8 +176,7 @@ def redrawGameWindow(levelNumber, widthLowerBoundary, widthUpperBoundary, height
     win.currentWindow.blit(stageCounter_txt, (0,0))
 
     #Display coins
-    totalCoins = sum(coinsList)
-    coin_txt = score_font.render("Coins: " + str(totalCoins), True, "black")
+    coin_txt = score_font.render("Coins: " + str(coinsList[0]), True, "black")
     win.currentWindow.blit(coin_txt, (800, win.winHeight-50))
 
 
@@ -197,7 +197,7 @@ def redrawGameWindow(levelNumber, widthLowerBoundary, widthUpperBoundary, height
     #Update/Finalize all changes made
     pygame.display.flip()
     
-    return [score, totalCoins]
+    return [score, coinsList[0]]
 
 #~~~ Main Loop ~~~
 #Toggles the Running status of the game (on/off)
@@ -209,7 +209,7 @@ spawnTrash(5, char.speed, widthBoundary, win.backgroundList[0][1], heightBoundar
  
 #~~ Game Statuses ~~
 #Initialize the game status and play the starting screen first
-gameStatus = level.gameStatus("start")
+gameStatus = level.gameStatus("shop")
 
 #Initialize all the states
 #NOTE: Fonts are placed in a list
@@ -273,10 +273,15 @@ while run:
             else:
                 win.screenSizeIndex = 0
             win.setWindow()
+            win.updateBackground()
         
     #~~ Shop Interface ~~
     #Get the index to the upgrade from the upgradeList
     if gameStatus.getState() == "shop":
+        #Update the coin display
+        shop.coins = coinsList[0]
+
+        #Check which selection the player has made
         if pygame.key.get_pressed()[pygame.K_d] and upgradeIndex < 2:
             pygame.time.delay(100)
             upgradeIndex += 1
@@ -297,13 +302,12 @@ while run:
                 gameStatus.setState("runLevel")
 
             #Player buys an upgrade and checks if they have enough coins to do so
-            elif upgradeList[upgradeIndex] < 60 and len(coinsList) > 0:
+            elif upgradeList[upgradeIndex] < 60 and coinsList[0] > 0:
                 #Collect the coins
-                if int(upgradeList[upgradeIndex] / 10) <= len(coinsList):
-                    for i in range(int(upgradeList[upgradeIndex] / 10)):
-                        coinsList.pop()
-                    #Update coinsList
-                    shop.coins = sum(coinsList)
+                if int(upgradeList[upgradeIndex] / 10)*10 <= coinsList[0]:
+                    coinsList[0] = coinsList[0] - 10*int(upgradeList[upgradeIndex] / 10)
+                    #Update coinsList/display
+                    shop.coins = coinsList[0]
                     #Increase corresponding upgrade by 10 on the upgradeList
                     upgradeList[upgradeIndex] = upgradeList[upgradeIndex] + 10
                     #Update the corresponding variables base on the values in the upgradeList

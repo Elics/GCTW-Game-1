@@ -1,12 +1,16 @@
 #This file manages the gameStatus, which is the cutscenes or levels to be played
 #Each level or cutscene, which will be called states, is defined in its own class
 import pygame
+import window
 
 #NOTE: Add a way to track already played scenes/levels
 
 #~~ Background Images ~~
-menu_bg = pygame.image.load("photo\\Menu.png")
-# menu_bg = pygame.transform.scale(menu_bg, (winWidth, winHeight))
+tempWin = window.Window("Our Earth")
+tempWin.addBackground("images\\backgrounds\\Menu.png", None)
+tempWin.addBackground("images\\backgrounds\\Start.png", None)
+tempWin.addBackground("images\\backgrounds\\Quit.png", None)
+
 
 #Sets the game status, return the current status, and set the status
 class gameStatus():
@@ -33,12 +37,7 @@ class startGame():
         self.fontSet = fontSet
 
     def run(self):
-        self.display.fill("white")
-        title_txt = self.fontSet[0].render("Environmental", True, "black")
-        press_space_txt = self.fontSet[1].render("Press SPACE to start/Press M for the menu", True, "Black")
-
-        self.display.blit(title_txt, (200, 150))
-        self.display.blit(press_space_txt, (200, 250))
+        self.display.blit(tempWin.backgroundList[1][0], (0,0))
 
         pygame.display.flip()
 
@@ -55,17 +54,9 @@ class menuScreen():
         self.select = None
 
     def run(self):
-        self.display.blit(menu_bg, (0,0))
+        self.display.blit(tempWin.backgroundList[0][0], (0,0))
 
-        #Buttons
-
-        #Text
-
-        #Render Text
-        
-        #Render Buttons
-        # if (self.selected == 0):
-        #     pass
+        #NOTE: Render buttons when pressed
 
         pygame.display.flip()
 
@@ -136,14 +127,7 @@ class gameEnd():
         self.fontSet = fontSet
 
     def run(self):
-        self.display.fill("black")
-        end_txt = self.fontSet[0].render("Game Over", True, "white")
-        press_space_txt = self.fontSet[1].render("Press SPACE to go back to Start Screen", True, "white")
-        note_txt = self.fontSet[1].render("All upgrades are kept until you press X!", True, "white")
-
-        self.display.blit(end_txt, (300, 300))
-        self.display.blit(press_space_txt, (320, 400))
-        self.display.blit(note_txt, (320, 450))
+        self.display.blit(tempWin.backgroundList[2][0], (0,0))
 
         pygame.display.flip()
 

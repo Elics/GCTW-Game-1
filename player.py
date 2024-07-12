@@ -29,11 +29,11 @@ class Player():
     #Changes the x and y coordinates of the player. 
     #Requires the current key input, the width boundary and the height boundary of the window
     #Sets the animation to run as well depending on what key is pressed
-    def movement(self, keys, widthBounds, heightBounds, backgroundHeight):
+    def movement(self, keys, widthLowerBounds, widthUpperBounds, heightLowerBounds, heightUpperBounds):
         #Checks the key and moves the character correspondingly
 
         #Left
-        if keys[pygame.K_a] and self.hitbox[0] > self.speed :
+        if keys[pygame.K_a] and self.hitbox[0] > widthLowerBounds :
             self.x -= self.speed
             self.left = False
             self.right = True
@@ -42,7 +42,7 @@ class Player():
             self.currentSet = 6
 
         #Right
-        elif keys[pygame.K_d] and self.hitbox[0] < widthBounds:
+        elif keys[pygame.K_d] and self.hitbox[0] < widthUpperBounds:
             self.x += self.speed
             self.left = True
             self.right = False
@@ -51,7 +51,7 @@ class Player():
             self.currentSet = 4
         
         #Down
-        elif keys[pygame.K_w] and self.hitbox[1] > backgroundHeight:
+        elif keys[pygame.K_w] and self.hitbox[1] > heightLowerBounds:
             self.y -= self.speed
             self.left = False
             self.right = False
@@ -60,7 +60,7 @@ class Player():
             self.currentSet = 5
 
         #Up
-        elif keys[pygame.K_s] and self.hitbox[1] < heightBounds:
+        elif keys[pygame.K_s] and self.hitbox[1] < heightUpperBounds:
             self.y += self.speed
             self.left = False
             self.right = False

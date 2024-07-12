@@ -11,8 +11,6 @@ pygame.init()
 
 #Initialize window and set name of the window
 win = window.Window("Our Earth")
-#Add backgrounds for the LEVELS
-win.addBackground("images\\backgrounds\\Beach.png", 200)
 
 #~~ Player Initialization Variables ~~
 #Player's Initial X & Y Coordinates
@@ -102,6 +100,8 @@ coinsList = [0]
 upgradeList = [char.speed, baseTime]
 
 #~~ Level Features ~~
+levelsList = [1,2,3]
+currentLevel = 0
 #Stores all the surfaces/trash sprites
 trashPile = []
 #Contains the rectangles of all the generated trash
@@ -156,12 +156,7 @@ def collectTrash(player_hitbox, widthLowerBoundary, widthUpperBoundary, heightLo
 #Update the game window with new animations/movement
 #Parameters: Current Level and 4 Boundaries adjustments to define the trash spawn areas 
 #Returns the number of coins earned by the end of the level
-def redrawGameWindow(levelNumber, widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary):
-    #Load/Update Background
-    #NOTE: When there are multiple levels, create a list/if-else to load proper backgrounds per level
-    if levelNumber == 1:
-        win.currentWindow.blit(win.backgroundList[0][0], (0,0))
-
+def redrawGameWindow(widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary):
     #Draw the trash that exists in trashPile
     for trash in trashPile:
         if trash.treasure == 1:
@@ -169,6 +164,8 @@ def redrawGameWindow(levelNumber, widthLowerBoundary, widthUpperBoundary, height
         else:    
             pygame.draw.rect(win.currentWindow, "red", trash.hitbox)
 
+
+    #NOTE: Update the location of the displays so they scale properly with the screen size when changed
     #Display the score
     score_txt = score_font.render("Collected: " + str(collectPile[0]), True, "black")
     stageCounter_txt = score_font.render(str(stageCounter), True, "black")
@@ -179,7 +176,6 @@ def redrawGameWindow(levelNumber, widthLowerBoundary, widthUpperBoundary, height
     coin_txt = score_font.render("Coins: " + str(coinsList[0]), True, "black")
     win.currentWindow.blit(coin_txt, (800, win.winHeight-50))
 
-
     #Load the player/Update player's movement
     char.playerHitbox(scale)
 
@@ -187,12 +183,11 @@ def redrawGameWindow(levelNumber, widthLowerBoundary, widthUpperBoundary, height
     # pygame.draw.rect(win.currentWindow, "red", char.hitbox)
     # win.currentWindow.blit(char_frame, (char.x, char.y))
 
-     #Show frame
+    #Show frame
     win.currentWindow.blit(animations[currentSet][currentFrame], (char.x, char.y))
 
     #Check collision and update trash lists accordingly
-    collectTrash(char.hitbox, widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary)
-   
+    collectTrash(char.hitbox, widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary) 
 
     #Update/Finalize all changes made
     pygame.display.flip()
@@ -203,7 +198,7 @@ run = True
 
 #Spawn the initial set of trash in the map
 #Spawn Location Dimensions (estimated): X:15-950; Y:200-550
-spawnTrash(5, char.speed, widthBoundary, win.backgroundList[0][1], heightBoundary)
+spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
  
 #~~ Game Statuses ~~
 #Initialize the game status and play the starting screen first
@@ -215,10 +210,10 @@ start = level.startGame(win.currentWindow, gameStatus, [title_font, instruction_
 menu = level.menuScreen(win.currentWindow, gameStatus, [title_font, subtitle_font])
 end = level.gameEnd(win.currentWindow, gameStatus, [title_font, subtitle_font])
 shop = level.upgradeShop(win.currentWindow, gameStatus, [title_font, subtitle_font, instruction_font], char.speed, baseTime, 0)
-runLevel = level.runLevel(gameStatus)
+runLevel = level.runLevel(gameStatus, levelsList[currentLevel])
 
 #All Cutscenes
-sceneOne = level.sceneOne(win.currentWindow, gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary), win.backgroundList[0][0])
+sceneOne = level.sceneOne(win.currentWindow, gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
 
 #Add the states to the gameStates dictionary
 #This allows the gameStatus class to know which state to call
@@ -264,13 +259,17 @@ while run:
             gameStatus.setState("end")
 
         #TESTING WINDOW SIZING OPTION TOGGLE
+        #When H is pressed, window changes to 3 different sizes: Small, Default, Large
         elif pygame.key.get_pressed()[pygame.K_h]:
-            if win.screenSizeIndex + 1< len(win.windowSizes):
+            if win.screenSizeIndex + 1 < len(win.windowSizes):
                 win.screenSizeIndex += 1
             else:
                 win.screenSizeIndex = 0
+            #After selection is made, update the window vvariables, the background, and the ingame bounds
             win.setWindow()
             win.updateBackground()
+            widthBoundary =  win.winWidth - char.hitbox[2] - char_s
+            heightBoundary = win.winHeight - char.hitbox[3]- char_s
         
     #~~ Shop Interface ~~
     #Get the index to the upgrade from the upgradeList
@@ -336,12 +335,19 @@ while run:
                 pygame.display.flip()
                 pygame.time.delay(500)
         
-    #Runs Collection Mode: Collecting trash
+    #~~ Collection Mode: Collect Trash ~~
     if gameStatus.getState() == "runLevel":
+        #Set up bounds base on level/background
+        if currentLevel == 0:
+            w_lowBounds = char.speed
+            h_lowbounds = win.backgroundList[3][1]
+        else:
+            w_lowBounds = char.speed
+            h_lowbounds = char.speed
         #Get the user's input, specifically which keys they pressed
         #Then base on these keys, move the player around the map
         keys = pygame.key.get_pressed()
-        char.movement(keys, widthBoundary, heightBoundary, win.backgroundList[0][1])
+        char.movement(keys, w_lowBounds, widthBoundary, h_lowbounds, heightBoundary)
         #Return the current animation set that the player toggled based on the movement method
         currentSet = char.currentSet
 
@@ -356,7 +362,7 @@ while run:
         previousTime = char_sheet.frameTiming(currentTime, previousTime, frameCoolDown, currentFrame, currentSet)[1]
 
         #Update the window and return the score and coin list
-        redrawGameWindow(1, char.speed, widthBoundary, win.backgroundList[0][1], heightBoundary)
+        redrawGameWindow(w_lowBounds, widthBoundary, h_lowbounds, heightBoundary)
 
         #Update Shop Coin Display
         shop.coins = coinsList[0]

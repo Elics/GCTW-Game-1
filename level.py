@@ -7,10 +7,6 @@ import window
 
 #~~ Background Images ~~
 tempWin = window.Window("Our Earth")
-tempWin.addBackground("images\\backgrounds\\Menu.png", None)
-tempWin.addBackground("images\\backgrounds\\Start.png", None)
-tempWin.addBackground("images\\backgrounds\\Quit.png", None)
-
 
 #Sets the game status, return the current status, and set the status
 class gameStatus():
@@ -55,6 +51,16 @@ class menuScreen():
 
     def run(self):
         self.display.blit(tempWin.backgroundList[0][0], (0,0))
+        
+        #NOTE: Try to find a way to combine the two sets of window configs together?
+        #Here, the toggle is also updated in the level.py, allowing the backgrounds to update accordingly
+        if pygame.key.get_pressed()[pygame.K_h]:
+            if tempWin.screenSizeIndex + 1 < len(tempWin.windowSizes):
+                tempWin.screenSizeIndex += 1
+            else:
+                tempWin.screenSizeIndex = 0
+            tempWin.setWindow()
+            tempWin.updateBackground()
 
         #NOTE: Render buttons when pressed
 
@@ -136,10 +142,12 @@ class gameEnd():
       
 #Runs the collection game mode. To run, I simply toggle the variable collectionMode
 class runLevel():
-    def __init__(self, gameStatus):
+    def __init__(self, gameStatus, levelNumber):
         self.gameStatus = gameStatus 
+        self.levelNumber = levelNumber
     def run(self):
-        pass
+        if self.levelNumber == 1:
+            tempWin.currentWindow.blit(tempWin.backgroundList[3][0], (0,0))
 
 # ~~Cutscenes~~
 class dialogueBox():
@@ -150,10 +158,11 @@ class dialogueBox():
         self.fontSet = fontSet
 
     #Character limit is 50
+    #NOTE: Modify the image and text locations to scale properly when screen size changes
     def setDialogue(self, textSet, counter):
         #Run the dialogue 
         if len(textSet) > counter:
-            self.dialogueBox = pygame.Rect(0, 420, 1000, 200)
+            self.dialogueBox = pygame.Rect(0, 420, tempWin.winWidth, tempWin.winHeight)
             pygame.draw.rect(self.display, self.color, self.dialogueBox)
             self.display.blit(self.animationSet[0][0], (-80, 350))
 
@@ -161,12 +170,10 @@ class dialogueBox():
             self.display.blit(instructions_txt, (800, 550))
             dialogue_txt = self.fontSet[0].render(textSet[counter], True, "white")
             self.display.blit(dialogue_txt, (200, 500))
-        else:
-            self.display.fill("white")
         
 
 class sceneOne():
-    def __init__(self, display, gameStatus, fontSet, animationSet, dialogueSet, playerClass, playerSheet, scale, windowDimensions, background):
+    def __init__(self, display, gameStatus, fontSet, animationSet, dialogueSet, playerClass, playerSheet, scale, windowDimensions):
         self.display = display
         self.gameStatus = gameStatus 
         self.fontSet = fontSet
@@ -179,7 +186,6 @@ class sceneOne():
         self.sceneText = 0
         self.width = windowDimensions[0]
         self.height = windowDimensions[1]
-        self.background = background
 
         #Animations for the scene
         self.currentFrame = 0
@@ -189,7 +195,7 @@ class sceneOne():
         self.playerClass.y = 250
 
     def run(self):
-        self.display.blit(self.background, (0 ,0))
+        self.display.blit(tempWin.backgroundList[3][0], (0 ,0))
         NPCs = [pygame.Rect(600, 500, 100, 50)]
 
         #Set up Dialogue
@@ -204,7 +210,7 @@ class sceneOne():
         #Allow players to move when True
         if self.sceneMove == True:
             keys = pygame.key.get_pressed()
-            self.playerClass.movement(keys, self.width, self.height, 200)
+            self.playerClass.movement(keys, self.playerClass.speed, self.width, 200, self.height)
 
         #Idle Animation
         currentSet = self.playerClass.currentSet

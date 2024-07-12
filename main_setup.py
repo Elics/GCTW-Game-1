@@ -94,7 +94,7 @@ name_font = pygame.font.SysFont('Nunito', 40, True)
 #Index to loop through available upgrades
 upgradeIndex = 0
 #A list to store all coin values collected
-coinsList = [10]
+coinsList = [0]
 #A List of all Upgrades
  #Upgrades
     # char.speed += 10
@@ -107,7 +107,7 @@ trashPile = []
 #Contains the rectangles of all the generated trash
 trashHitboxes = []
 #Holds all collected trash
-collectPile = []
+collectPile = [0]
 #Tracks score on each level
 scoresList = []
 
@@ -140,11 +140,12 @@ def collectTrash(player_hitbox, widthLowerBoundary, widthUpperBoundary, heightLo
         if trashPile[collectTrash].treasure == 1:
         #If trash has treasure attribute: 10+ Coins, 5+ Points
             coinsList[0] = coinsList[0] + 10
-            collectPile.append(5)
+            collectPile[0] = collectPile[0] + 5
         else:
         #Normal Trash: 2+ Coints, 1+ Points
             coinsList[0] = coinsList[0] + 2
-            collectPile.append(1)
+            collectPile[0] = collectPile[0] + 1
+
 
         #Replace the current trash object with the new one
         trashPile[collectTrash] = newTrash
@@ -169,8 +170,7 @@ def redrawGameWindow(levelNumber, widthLowerBoundary, widthUpperBoundary, height
             pygame.draw.rect(win.currentWindow, "red", trash.hitbox)
 
     #Display the score
-    score = len(collectPile)
-    score_txt = score_font.render("Collected: " + str(score), True, "black")
+    score_txt = score_font.render("Collected: " + str(collectPile[0]), True, "black")
     stageCounter_txt = score_font.render(str(stageCounter), True, "black")
     win.currentWindow.blit(score_txt, (10, win.winHeight-50))
     win.currentWindow.blit(stageCounter_txt, (0,0))
@@ -196,8 +196,6 @@ def redrawGameWindow(levelNumber, widthLowerBoundary, widthUpperBoundary, height
 
     #Update/Finalize all changes made
     pygame.display.flip()
-    
-    return [score, coinsList[0]]
 
 #~~~ Main Loop ~~~
 #Toggles the Running status of the game (on/off)
@@ -209,7 +207,7 @@ spawnTrash(5, char.speed, widthBoundary, win.backgroundList[0][1], heightBoundar
  
 #~~ Game Statuses ~~
 #Initialize the game status and play the starting screen first
-gameStatus = level.gameStatus("shop")
+gameStatus = level.gameStatus("start")
 
 #Initialize all the states
 #NOTE: Fonts are placed in a list
@@ -245,9 +243,8 @@ while run:
         if stageCounter == 0:
             stageCounter = baseTime
             gameStatus.setState("shop")
-            scoresList.append(scoreCoinList[0])
-            while len(collectPile) != 0:
-                collectPile.pop()
+            scoresList.append(collectPile[0])
+            collectPile[0] = 0
 
     #Get the current gameStatus and check through the gameStates dictionary
     #When there is a match, run the given state
@@ -359,10 +356,10 @@ while run:
         previousTime = char_sheet.frameTiming(currentTime, previousTime, frameCoolDown, currentFrame, currentSet)[1]
 
         #Update the window and return the score and coin list
-        scoreCoinList = redrawGameWindow(1, char.speed, widthBoundary, win.backgroundList[0][1], heightBoundary)
+        redrawGameWindow(1, char.speed, widthBoundary, win.backgroundList[0][1], heightBoundary)
 
         #Update Shop Coin Display
-        shop.coins = scoreCoinList[1]
+        shop.coins = coinsList[0]
 
 #When the game is off, close the pygame program as well.
 pygame.quit()

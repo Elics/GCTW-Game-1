@@ -27,8 +27,8 @@ class gameStatus():
 
 #The starting screen
 class startGame():
-    def __init__(self, display, gameStatus, fontSet):
-        self.display = display
+    def __init__(self, gameStatus, fontSet):
+        self.display = tempWin.currentWindow
         self.gameStatus = gameStatus
         self.fontSet = fontSet
 
@@ -43,24 +43,31 @@ class startGame():
 
 #Menu Screen
 class menuScreen():
-    def __init__(self, display, gameStatus, fontSet):
-        self.display = display
+    def __init__(self, gameStatus, fontSet):
+        self.display = tempWin.currentWindow
         self.gameStatus = gameStatus
         self.fontSet = fontSet
         self.select = None
+        self.width = tempWin.winWidth
+        self.height = tempWin.winHeight
 
     def run(self):
         self.display.blit(tempWin.backgroundList[0][0], (0,0))
-        
-        #NOTE: Try to find a way to combine the two sets of window configs together?
-        #Here, the toggle is also updated in the level.py, allowing the backgrounds to update accordingly
+
+        #Toggle screen size and updates the backgrounds accordingly
+        #3 different sizes: Small, Default, Large
         if pygame.key.get_pressed()[pygame.K_h]:
             if tempWin.screenSizeIndex + 1 < len(tempWin.windowSizes):
                 tempWin.screenSizeIndex += 1
+                pygame.time.delay(200)
             else:
                 tempWin.screenSizeIndex = 0
             tempWin.setWindow()
             tempWin.updateBackground()
+            #After the sizes are adjusted, update the width and height variables 
+            #These variables will be accessed and updated in main.py
+            self.width = tempWin.winWidth
+            self.height = tempWin.winHeight
 
         #NOTE: Render buttons when pressed
 
@@ -68,8 +75,8 @@ class menuScreen():
 
 #Displays Upgrade Shop after every level
 class upgradeShop():
-    def __init__(self, display, gameStatus, fontSet, speed, time, coins):
-        self.display = display
+    def __init__(self, gameStatus, fontSet, speed, time, coins):
+        self.display = tempWin.currentWindow
         self.gameStatus = gameStatus
         self.fontSet = fontSet
         self.speedBuff = speed
@@ -78,57 +85,27 @@ class upgradeShop():
         self.selected = None
 
     def run(self):
-        self.display.fill("#E5FFB8")
-        #Create top of screen text
-        title_txt = self.fontSet[0].render("Shop", True, "black")
-        instructions_txt = self.fontSet[1].render("Press SPACE to select/Press M to access MENU", True, "black")
-        cost_txt = self.fontSet[2].render("Each upgrade starts at 10 coins and increased by 10 coins over time", True, "black")
-
-        #Create button and captions text
-        speedRect = pygame.Rect(100, 300, 325, 50)
-        timeRect = pygame.Rect(600, 300, 325, 50)
-        skipRect = pygame.Rect(350, 400, 325, 50)
-        speed_txt = self.fontSet[1].render("Current Speed: " + str(self.speedBuff), False, "black")
-        time_txt = self.fontSet[1].render("Current Timelimit: " + str(self.timeBuff), False, "black")
-        coins_txt = self.fontSet[1].render("Coins: " + str(self.coins), False, "black")
-        speedUpgrade_txt = self.fontSet[1].render("Speed +10", False, "black")
-        timeUpgrade_txt = self.fontSet[1].render("Time +10", False, "black")
-        skip_txt = self.fontSet[1].render("Next Level", False, "Red")
-
-        #Render the Shop Text & Instructions
-        self.display.blit(title_txt, (400, 0))
-        self.display.blit(coins_txt, (800, 20))
-        self.display.blit(cost_txt, (250, 150))
-        self.display.blit(instructions_txt, (50, 550))
-
-        #When a button is selected, highlight its corresponding rectangle
+        #Background Display
+        #When an upgrade is selected, change the background to show it highlighted
         #Each upgrade button corresponds to an integer
         if (self.selected == 0):
-            pygame.draw.rect(self.display, "pink", speedRect)
-        else:
-            pygame.draw.rect(self.display, "white", speedRect)
-        self.display.blit(speed_txt, (100, 100))
-        self.display.blit(speedUpgrade_txt, (150, 300))
+            self.display.blit(tempWin.backgroundList[4][0], (0,0))
+        elif (self.selected == 1):
+            self.display.blit(tempWin.backgroundList[5][0], (0,0))
+        elif (self.selected == 2):
+            self.display.blit(tempWin.backgroundList[6][0], (0,0))
 
-        if (self.selected == 1):
-            pygame.draw.rect(self.display, "pink", timeRect)
-        else:
-            pygame.draw.rect(self.display, "white", timeRect)
-        self.display.blit(time_txt, (600, 100))
-        self.display.blit(timeUpgrade_txt, (650, 300))
-
-        if (self.selected == 2):
-            pygame.draw.rect(self.display, "pink", skipRect)
-        else:
-            pygame.draw.rect(self.display, "white", skipRect)
-        self.display.blit(skip_txt, (380, 400))
+        #Display Coins
+        #Coins Display Text
+        coins_txt = self.fontSet[1].render(str(self.coins), False, "white")
+        self.display.blit(coins_txt, (50, 530))
 
         pygame.display.flip()
         
 #The ending scene
 class gameEnd():
-    def __init__(self, display, gameStatus, fontSet):
-        self.display = display
+    def __init__(self, gameStatus, fontSet):
+        self.display = tempWin.currentWindow
         self.gameStatus = gameStatus 
         self.fontSet = fontSet
 
@@ -151,8 +128,8 @@ class runLevel():
 
 # ~~Cutscenes~~
 class dialogueBox():
-    def __init__(self, display, color, animationSet, fontSet):
-        self.display = display
+    def __init__(self, color, animationSet, fontSet):
+        self.display = tempWin.currentWindow
         self.color = color
         self.animationSet = animationSet
         self.fontSet = fontSet
@@ -173,8 +150,8 @@ class dialogueBox():
         
 
 class sceneOne():
-    def __init__(self, display, gameStatus, fontSet, animationSet, dialogueSet, playerClass, playerSheet, scale, windowDimensions):
-        self.display = display
+    def __init__(self, gameStatus, fontSet, animationSet, dialogueSet, playerClass, playerSheet, scale, windowDimensions):
+        self.display = tempWin.currentWindow
         self.gameStatus = gameStatus 
         self.fontSet = fontSet
         self.animationSet = animationSet
@@ -199,7 +176,7 @@ class sceneOne():
         NPCs = [pygame.Rect(600, 500, 100, 50)]
 
         #Set up Dialogue
-        testBox = dialogueBox(self.display, "black", self.dialogueSet, self.fontSet)
+        testBox = dialogueBox("black", self.dialogueSet, self.fontSet)
         textOne = ["Finally, after a long day I can relax on the beach.", "Let's find a good spot to lay down."]
         textTwo = ["Hmm, it is pretty hard to find a spot", "Let's clean up a bit."]
         dialogueList = [textOne, textTwo]

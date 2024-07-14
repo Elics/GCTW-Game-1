@@ -92,7 +92,7 @@ name_font = pygame.font.SysFont('Nunito', 40, True)
 #Index to loop through available upgrades
 upgradeIndex = 0
 #A list to store all coin values collected
-coinsList = [0]
+coinsList = [35]
 #A List of all Upgrades
  #Upgrades
     # char.speed += 10
@@ -202,18 +202,19 @@ spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundar
  
 #~~ Game Statuses ~~
 #Initialize the game status and play the starting screen first
-gameStatus = level.gameStatus("start")
+gameStatus = level.gameStatus("shop")
 
 #Initialize all the states
 #NOTE: Fonts are placed in a list
-start = level.startGame(win.currentWindow, gameStatus, [title_font, instruction_font])
-menu = level.menuScreen(win.currentWindow, gameStatus, [title_font, subtitle_font])
-end = level.gameEnd(win.currentWindow, gameStatus, [title_font, subtitle_font])
-shop = level.upgradeShop(win.currentWindow, gameStatus, [title_font, subtitle_font, instruction_font], char.speed, baseTime, 0)
+start = level.startGame(gameStatus, [title_font, instruction_font])
+menu = level.menuScreen(gameStatus, [title_font, subtitle_font])
+end = level.gameEnd(gameStatus, [title_font, subtitle_font])
+shop = level.upgradeShop(gameStatus, [title_font, subtitle_font, instruction_font], char.speed, baseTime, 0)
 runLevel = level.runLevel(gameStatus, levelsList[currentLevel])
 
 #All Cutscenes
-sceneOne = level.sceneOne(win.currentWindow, gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
+# sceneOne = level.sceneOne(win.currentWindow, gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
+sceneOne = level.sceneOne(gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
 
 #Add the states to the gameStates dictionary
 #This allows the gameStatus class to know which state to call
@@ -248,28 +249,21 @@ while run:
 
     #Menu Screen Toggle
     if pygame.key.get_pressed()[pygame.K_m]:
+        #When opening the menu, track the previous state and then change to menu state
         if gameStatus.getState() != "menu":
             gameStatus.setPreviousState()
             gameStatus.setState("menu")
         else:
+            #When closing the Menu, updates the game boundaries according to the screen size
+            widthBoundary =  menu.width - char.hitbox[2] - char_s
+            heightBoundary = menu.height - char.hitbox[3]- char_s
+            #Return to the previous state
             gameStatus.setState(gameStatus.getPreviousState())
     #If Q is pressed, return the End Screen
     if gameStatus.getState() == "menu":
         if pygame.key.get_pressed()[pygame.K_q]: 
             gameStatus.setState("end")
-
-        #TESTING WINDOW SIZING OPTION TOGGLE
-        #When H is pressed, window changes to 3 different sizes: Small, Default, Large
-        elif pygame.key.get_pressed()[pygame.K_h]:
-            if win.screenSizeIndex + 1 < len(win.windowSizes):
-                win.screenSizeIndex += 1
-            else:
-                win.screenSizeIndex = 0
-            #After selection is made, update the window vvariables, the background, and the ingame bounds
-            win.setWindow()
-            win.updateBackground()
-            widthBoundary =  win.winWidth - char.hitbox[2] - char_s
-            heightBoundary = win.winHeight - char.hitbox[3]- char_s
+        
         
     #~~ Shop Interface ~~
     #Get the index to the upgrade from the upgradeList

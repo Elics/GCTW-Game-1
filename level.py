@@ -13,6 +13,7 @@ class gameStatus():
     def __init__(self, currentState):
         self.currentState = currentState
         self.previousState = currentState
+        self.windowDetails = tempWin
 
     def getState(self):
         return self.currentState

@@ -9,15 +9,19 @@ import window
 #Initialize pygame program
 pygame.init()
 
-#Initialize window and set name of the window
-win = window.Window("Our Earth")
+#Initialize the game status class and play the starting screen first
+#I place this here to access the windowDetails variable, which is used to display backgrounds in level.py
+gameStatus = level.gameStatus("shop")
+
+#Initialize window using windowDetails variable, which is a window class from window.py
+win = gameStatus.windowDetails
 
 #~~ Player Initialization Variables ~~
 #Player's Initial X & Y Coordinates
 char_x = 0 
 char_y = 0 
 #Player's Initial Speed
-char_s = 15 
+char_s = 15
 #Character Model Scale
 scale = 6 
 
@@ -92,7 +96,7 @@ name_font = pygame.font.SysFont('Nunito', 40, True)
 #Index to loop through available upgrades
 upgradeIndex = 0
 #A list to store all coin values collected
-coinsList = [35]
+coinsList = [0]
 #A List of all Upgrades
  #Upgrades
     # char.speed += 10
@@ -201,9 +205,6 @@ run = True
 spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
  
 #~~ Game Statuses ~~
-#Initialize the game status and play the starting screen first
-gameStatus = level.gameStatus("shop")
-
 #Initialize all the states
 #NOTE: Fonts are placed in a list
 start = level.startGame(gameStatus, [title_font, instruction_font])
@@ -311,21 +312,25 @@ while run:
                 #If the player does not have enough coins for the upgrade
                 else:
                     lessCoins_txt = subtitle_font.render("Not enough coins for next upgrade level!", True, "blue")
-                    win.currentWindow.blit(lessCoins_txt, (250, 250))
+                    win.currentWindow.blit(lessCoins_txt, (int(win.winWidth*0.25), int(win.winHeight*0.8)))
                     pygame.display.flip()
                     pygame.time.delay(500)
 
             #If the player reached max upgrade on any item
             elif upgradeList[upgradeIndex] >= 60:
                 maxUpgradeReach_txt = subtitle_font.render("Max Upgrade Reached!", True, "blue")
-                win.currentWindow.blit(maxUpgradeReach_txt, (350, 250))
+                win.currentWindow.blit(maxUpgradeReach_txt,  (int(win.winWidth*0.35), int(win.winHeight*0.8)))
                 pygame.display.flip()
                 pygame.time.delay(500)
 
             #If the player has 0 coins 
             else:
+                #Testing Scale with dummy surface
                 noCoins_txt = subtitle_font.render("You have no coins!", True, "blue")
-                win.currentWindow.blit(noCoins_txt, (350, 250))
+                test = win.addUI(noCoins_txt, (350, 450))
+                win.currentWindow.blit(test, (0, 0))
+
+                # win.currentWindow.blit(noCoins_txt, (int(win.winWidth*0.35), int(win.winHeight*0.75)))
                 pygame.display.flip()
                 pygame.time.delay(500)
         

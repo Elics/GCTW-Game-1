@@ -9,12 +9,8 @@ import window
 #Initialize pygame program
 pygame.init()
 
-#Initialize the game status class and play the starting screen first
-#I place this here to access the windowDetails variable, which is used to display backgrounds in level.py
-gameStatus = level.gameStatus("shop")
-
 #Initialize window using windowDetails variable, which is a window class from window.py
-win = gameStatus.windowDetails
+win = level.tempWin
 
 #~~ Player Initialization Variables ~~
 #Player's Initial X & Y Coordinates
@@ -205,6 +201,10 @@ run = True
 spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
  
 #~~ Game Statuses ~~
+#Initialize the game status class and play the starting screen first
+#I place this here to access the windowDetails variable, which is used to display backgrounds in level.py
+gameStatus = level.gameStatus("shop")
+
 #Initialize all the states
 #NOTE: Fonts are placed in a list
 start = level.startGame(gameStatus, [title_font, instruction_font])
@@ -312,14 +312,15 @@ while run:
                 #If the player does not have enough coins for the upgrade
                 else:
                     lessCoins_txt = subtitle_font.render("Not enough coins for next upgrade level!", True, "blue")
-                    win.currentWindow.blit(lessCoins_txt, (int(win.winWidth*0.25), int(win.winHeight*0.8)))
+                    win.addUI
+                    win.currentWindow.blit(lessCoins_txt, (240, 450))
                     pygame.display.flip()
                     pygame.time.delay(500)
 
             #If the player reached max upgrade on any item
             elif upgradeList[upgradeIndex] >= 60:
                 maxUpgradeReach_txt = subtitle_font.render("Max Upgrade Reached!", True, "blue")
-                win.currentWindow.blit(maxUpgradeReach_txt,  (int(win.winWidth*0.35), int(win.winHeight*0.8)))
+                win.currentWindow.blit(maxUpgradeReach_txt, (330, 450))
                 pygame.display.flip()
                 pygame.time.delay(500)
 

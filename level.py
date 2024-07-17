@@ -13,7 +13,6 @@ class gameStatus():
     def __init__(self, currentState):
         self.currentState = currentState
         self.previousState = currentState
-        self.windowDetails = tempWin
 
     def getState(self):
         return self.currentState
@@ -40,7 +39,7 @@ class startGame():
 
         if pygame.key.get_pressed()[pygame.K_SPACE]:
             pygame.time.delay(300)
-            self.gameStatus.setState("sceneOne")
+            self.gameStatus.setState("playPrologue")
 
 #Menu Screen
 class menuScreen():
@@ -99,7 +98,7 @@ class upgradeShop():
         #Display Coins
         #Coins Display Text
         coins_txt = self.fontSet[1].render(str(self.coins), False, "white")
-        self.display.blit(coins_txt, (50, 530))
+        tempWin.addUI(coins_txt, (50, 530))
 
         pygame.display.flip()
         
@@ -136,55 +135,52 @@ class dialogueBox():
         self.fontSet = fontSet
 
     #Character limit is 50
-    #NOTE: Modify the image and text locations to scale properly when screen size changes
+    #Create a dialogue block on the bottom of the screen and display the given set of text
     def setDialogue(self, textSet, counter):
         #Run the dialogue 
         if len(textSet) > counter:
             self.dialogueBox = pygame.Rect(0, 420, tempWin.winWidth, tempWin.winHeight)
             pygame.draw.rect(self.display, self.color, self.dialogueBox)
-            self.display.blit(self.animationSet[0][0], (-80, 350))
+            tempWin.addUI(self.animationSet[0][0], (-80, 350))
 
             instructions_txt = self.fontSet[1].render("Press SPACE to continue", True, "white")
-            self.display.blit(instructions_txt, (800, 550))
-            dialogue_txt = self.fontSet[0].render(textSet[counter], True, "white")
-            self.display.blit(dialogue_txt, (200, 500))
-        
+            tempWin.addUI(instructions_txt, (800, 550))
 
+            #NOTE: Find a way to have multiple sentences rotate/show in a dialogue box
+           
+            dialogue_txt = self.fontSet[0].render(textSet[counter], True, "white")
+            tempWin.addUI(dialogue_txt, (200, 500))
+        
+    
 class sceneOne():
-    def __init__(self, gameStatus, fontSet, animationSet, dialogueSet, playerClass, playerSheet, scale, windowDimensions):
+    def __init__(self, gameStatus, fontSet, animationSet, profileSet, playerClass, playerSheet, scale, windowDimensions):
         self.display = tempWin.currentWindow
         self.gameStatus = gameStatus 
         self.fontSet = fontSet
         self.animationSet = animationSet
-        self.dialogueSet = dialogueSet
+        self.profileSet = profileSet
         self.playerClass = playerClass
         self.playerSheet = playerSheet
         self.scale = scale
-        self.sceneMove = False
-        self.sceneText = 0
+        
         self.width = windowDimensions[0]
         self.height = windowDimensions[1]
 
+        #Tracks scene progression/dialogue
+        self.sceneMove = False
+        self.sceneText = 0
+        self.counter = 0
+
         #Animations for the scene
         self.currentFrame = 0
-        self.counter = 0
         self.previousTime = pygame.time.get_ticks()
-        self.playerClass.x = 300
-        self.playerClass.y = 250
 
-    def run(self):
-        self.display.blit(tempWin.backgroundList[3][0], (0 ,0))
-        NPCs = [pygame.Rect(600, 500, 100, 50)]
-
-        #Set up Dialogue
-        testBox = dialogueBox("black", self.dialogueSet, self.fontSet)
-        textOne = ["Finally, after a long day I can relax on the beach.", "Let's find a good spot to lay down."]
-        textTwo = ["Hmm, it is pretty hard to find a spot", "Let's clean up a bit."]
-        dialogueList = [textOne, textTwo]
+        #A temporary variable to help set the player's position in the scene
+        self.setPlayerPosition = True
         
-        for NPC in NPCs:
-            pygame.draw.rect(self.display, "red", NPC)
-            
+
+    #Allow the character to move around the map when sceneMove is True
+    def movementScene(self):
         #Allow players to move when True
         if self.sceneMove == True:
             keys = pygame.key.get_pressed()
@@ -198,21 +194,98 @@ class sceneOne():
         self.playerClass.playerHitbox(self.scale)
         self.display.blit(self.animationSet[currentSet][self.currentFrame], (self.playerClass.x, self.playerClass.y))
 
-        if pygame.Rect.collidelist(self.playerClass.hitbox, NPCs) != -1 and self.sceneMove == True:
-            self.sceneMove = False
-            self.counter = 0
-    
+    #loops through the given dialogue list with the given dialogue box. After the dialogue is finished, set the next scene
+    def loopDialogue(self, gameState, dialogueList, dialogueBox, movementTrue):
         #Loop through dialogue
+        #First check if the player is moving and the current scene exist in the dialogue list
         if self.sceneMove == False and len(dialogueList) > self.sceneText:
+            #Get the list of lines for the scene
             currentTextSet = dialogueList[self.sceneText]
+            #When the player presses space, run the next line
             if pygame.key.get_pressed()[pygame.K_SPACE]:
                 pygame.time.delay(300)
                 self.counter += 1 
-            elif len(currentTextSet) <= self.counter:
-                self.sceneMove = True
+            #If the list is finished, run the next list. If player is required to move for the next scene
+            #check movementTrue and set the sceneMove to true
+            elif (len(currentTextSet) <= self.counter):
+                if movementTrue == True:
+                    self.sceneMove = True
                 self.sceneText += 1
-            testBox.setDialogue(currentTextSet, self.counter)
-        elif len(dialogueList) <= self.sceneText:
-            self.gameStatus.setState("runLevel")
+            #When all conditions are checked, set the dialogue to from the current scene and counter
+            dialogueBox.setDialogue(currentTextSet, self.counter)
+        #If there is a gameState and the dialogueList (aka all the scenes) are finished, set the next state
+        if gameState != None and len(dialogueList) <= self.sceneText:
+            self.gameStatus.setState(gameState)
+
+    def run(self):
+        #Set where the player will appear on the scene when this class runs
+        if self.setPlayerPosition == True:
+            self.playerClass.x = 300
+            self.playerClass.y = 250
+            self.setPlayerPosition = False
+
+        #Spawn a trigger block to que the next sceneText
+        NPC = pygame.Rect(600, 500, 100, 50)
+
+        #Set up Dialogue
+        testBox = dialogueBox("black", self.profileSet, self.fontSet)
+        textOne = ["WOAH! Earth is bigger than I thought", "Base on the travel guide, there should be squawkers here", "Let's find a good spot to lay down"]
+        textTwo = ["Huh, what are all these hard \"rocks\"?", "OUCH! It got on my feet!", "Do humans really live in these conditions??", "Hmm, if I want to watch the squakers...", "...then I have to clear the area", "Let's clean up a bit. It shouldn't take too long, right?"]
+        dialogueList = [textOne, textTwo]
+        
+        self.display.blit(tempWin.backgroundList[3][0], (0 ,0))
+        pygame.draw.rect(self.display, "red", NPC)
+
+        sceneOne.movementScene(self)
+       
+        if pygame.Rect.colliderect(self.playerClass.hitbox, NPC) == True and self.sceneMove == True:
+            self.sceneMove = False
+            self.counter = 0
+    
+        self.loopDialogue("runLevel", dialogueList, testBox, True)
 
         pygame.display.flip()
+
+#Inherits the sceneOne class methods
+class prologue(sceneOne):
+    def __init__(self, gameStatus, fontSet, animationSet, profileSet, playerClass, playerSheet, scale, windowDimensions):
+        self.display = tempWin.currentWindow
+        self.gameStatus = gameStatus 
+        self.fontSet = fontSet
+        self.animationSet = animationSet
+        self.profileSet = profileSet
+        self.playerClass = playerClass
+        self.playerSheet = playerSheet
+        self.scale = scale
+        self.width = windowDimensions[0]
+        self.height = windowDimensions[1]
+
+        #Tracks scene progression/dialogue
+        self.sceneMove = False
+        self.sceneText = 0
+        self.counter = 0
+
+        #Animations for the scene
+        self.currentFrame = 0
+        self.previousTime = pygame.time.get_ticks()
+
+        #A temporary variable to help set the player's position in the scene
+        self.setPlayerPosition = True
+
+
+    def run(self):
+        #Set player location on scene when this class runs
+        if self.setPlayerPosition == True:
+            self.playerClass.x = 0
+            self.playerClass.y = 0
+            self.setPlayerPosition = False
+
+        self.display.fill("black")
+        prologueBox = dialogueBox("black", self.profileSet, self.fontSet)
+        prologue1 = ["For years, humans have always thought for themselves", "They never knew that beyond the Earth...", 'there were ALIENS!!']
+        self.loopDialogue(None, prologue1, prologueBox, False)
+
+        pygame.display.flip()
+
+
+        

@@ -164,17 +164,17 @@ def redrawGameWindow(widthLowerBoundary, widthUpperBoundary, heightLowerBoundary
         else:    
             pygame.draw.rect(win.currentWindow, "red", trash.hitbox)
 
-
-    #NOTE: Update the location of the displays so they scale properly with the screen size when changed
-    #Display the score
+    #Display score
     score_txt = score_font.render("Collected: " + str(collectPile[0]), True, "black")
+    win.addUI(score_txt, (750, 0))
+
+    #Display timer
     stageCounter_txt = score_font.render(str(stageCounter), True, "black")
-    win.currentWindow.blit(score_txt, (10, win.winHeight-50))
-    win.currentWindow.blit(stageCounter_txt, (0,0))
+    win.addUI(stageCounter_txt, (0,0))
 
     #Display coins
     coin_txt = score_font.render("Coins: " + str(coinsList[0]), True, "black")
-    win.currentWindow.blit(coin_txt, (800, win.winHeight-50))
+    win.addUI(coin_txt, (400, 0))
 
     #Load the player/Update player's movement
     char.playerHitbox(scale)
@@ -203,7 +203,7 @@ spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundar
 #~~ Game Statuses ~~
 #Initialize the game status class and play the starting screen first
 #I place this here to access the windowDetails variable, which is used to display backgrounds in level.py
-gameStatus = level.gameStatus("shop")
+gameStatus = level.gameStatus("sceneOne")
 
 #Initialize all the states
 #NOTE: Fonts are placed in a list
@@ -214,12 +214,13 @@ shop = level.upgradeShop(gameStatus, [title_font, subtitle_font, instruction_fon
 runLevel = level.runLevel(gameStatus, levelsList[currentLevel])
 
 #All Cutscenes
-# sceneOne = level.sceneOne(win.currentWindow, gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
+playPrologue = level.prologue(gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
 sceneOne = level.sceneOne(gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
+
 
 #Add the states to the gameStates dictionary
 #This allows the gameStatus class to know which state to call
-gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "runLevel":runLevel, "sceneOne":sceneOne} 
+gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "runLevel":runLevel, "sceneOne":sceneOne, "playPrologue":playPrologue} 
 
 while run:
     #Loading time for game
@@ -312,15 +313,14 @@ while run:
                 #If the player does not have enough coins for the upgrade
                 else:
                     lessCoins_txt = subtitle_font.render("Not enough coins for next upgrade level!", True, "blue")
-                    win.addUI
-                    win.currentWindow.blit(lessCoins_txt, (240, 450))
+                    win.addUI(lessCoins_txt, (240, 450)), (0, 0)
                     pygame.display.flip()
                     pygame.time.delay(500)
 
             #If the player reached max upgrade on any item
             elif upgradeList[upgradeIndex] >= 60:
                 maxUpgradeReach_txt = subtitle_font.render("Max Upgrade Reached!", True, "blue")
-                win.currentWindow.blit(maxUpgradeReach_txt, (330, 450))
+                win.addUI(maxUpgradeReach_txt, (330, 450)), (0,0)
                 pygame.display.flip()
                 pygame.time.delay(500)
 
@@ -328,8 +328,7 @@ while run:
             else:
                 #Testing Scale with dummy surface
                 noCoins_txt = subtitle_font.render("You have no coins!", True, "blue")
-                test = win.addUI(noCoins_txt, (350, 450))
-                win.currentWindow.blit(test, (0, 0))
+                win.addUI(noCoins_txt, (350, 450)), (0, 0)
 
                 # win.currentWindow.blit(noCoins_txt, (int(win.winWidth*0.35), int(win.winHeight*0.75)))
                 pygame.display.flip()
@@ -369,3 +368,5 @@ while run:
 
 #When the game is off, close the pygame program as well.
 pygame.quit()
+
+#NOTE: Next Goal, work on tutorial and first cutscene 

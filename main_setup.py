@@ -203,7 +203,7 @@ spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundar
 #~~ Game Statuses ~~
 #Initialize the game status class and play the starting screen first
 #I place this here to access the windowDetails variable, which is used to display backgrounds in level.py
-gameStatus = level.gameStatus("playPrologue")
+gameStatus = level.gameStatus("start")
 
 #Initialize all the states
 #NOTE: Fonts are placed in a list

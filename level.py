@@ -5,8 +5,14 @@ import window
 
 #NOTE: Add a way to track already played scenes/levels
 
-#~~ Background Images ~~
+#~~ Initialize Game Window ~~
 tempWin = window.Window("Our Earth")
+
+# ~~Scene Tracker ~~
+#Tracks all new and played scenes 
+newScenes = ["playPrologue", "sceneOne"]
+#When a scene has been played, it will be popped from the newScenes and appended to playedScenes
+playedScenes = []
 
 #Sets the game status, return the current status, and set the status
 class gameStatus():
@@ -37,9 +43,14 @@ class startGame():
 
         pygame.display.flip()
 
+
         if pygame.key.get_pressed()[pygame.K_SPACE]:
             pygame.time.delay(300)
-            self.gameStatus.setState("playPrologue")
+            if(not newScenes):
+                #NOTE: Create a menu selection interface to allow the player to choose where to start off
+                self.gameStatus.setState("runLevel")
+            else:    
+                self.gameStatus.setState(newScenes[0])
 
 #Menu Screen
 class menuScreen():
@@ -136,9 +147,9 @@ class dialogueBox():
 
     #Character limit is 50
     #Create a dialogue block on the bottom of the screen and display the given set of text
-    def setDialogue(self, textSet, counter):
+    def setDialogue(self, textSet, nextLine):
         #Run the dialogue 
-        if len(textSet) > counter:
+        if len(textSet) > nextLine:
             self.dialogueBox = pygame.Rect(0, 420, tempWin.winWidth, tempWin.winHeight)
             pygame.draw.rect(self.display, self.color, self.dialogueBox)
             tempWin.addUI(self.animationSet[0][0], (-80, 350))
@@ -148,7 +159,7 @@ class dialogueBox():
 
             #NOTE: Find a way to have multiple sentences rotate/show in a dialogue box
            
-            dialogue_txt = self.fontSet[0].render(textSet[counter], True, "white")
+            dialogue_txt = self.fontSet[0].render(textSet[nextLine], True, "white")
             tempWin.addUI(dialogue_txt, (200, 500))
         
     
@@ -168,8 +179,8 @@ class sceneOne():
 
         #Tracks scene progression/dialogue
         self.sceneMove = False
-        self.sceneText = 0
-        self.counter = 0
+        self.dialoguePart = 0
+        self.nextLine = 0
 
         #Animations for the scene
         self.currentFrame = 0
@@ -177,7 +188,7 @@ class sceneOne():
 
         #A temporary variable to help set the player's position in the scene
         self.setPlayerPosition = True
-        self.nextSceneToggle = None
+        self.nextSceneToggle = False
         
     #Allow the character to move around the map when sceneMove is True
     def movementScene(self):
@@ -194,66 +205,77 @@ class sceneOne():
         self.playerClass.playerHitbox(self.scale)
         self.display.blit(self.animationSet[currentSet][self.currentFrame], (self.playerClass.x, self.playerClass.y))
 
-    #loops through the given dialogue list with the given dialogue box. After the dialogue is finished, set the next scene
-    def loopDialogue(self, gameState, dialogueList, dialogueBox, movementTrue):
-        #Loop through dialogue
-        #First check if the player is moving and the current scene exist in the dialogue list
-        if len(dialogueList) > self.sceneText:
+    #Loops through the given dialogue list with the given dialogue box. After the dialogue is finished, set the next scene
+    def loopDialogue(self, gameState, dialogueList, dialogueBox):
+        #First check if all the dialogue has been spoken, else run the next set of dialogue (dialoguePart) from the list (dialogueList)
+        if len(dialogueList) > self.dialoguePart:
             #Get the list of lines for the scene
-            currentTextSet = dialogueList[self.sceneText]
+            currentDialogueLines = dialogueList[self.dialoguePart]
+
             #When the player presses space, run the next line
             if pygame.key.get_pressed()[pygame.K_SPACE]:
                 pygame.time.delay(300)
-                self.counter += 1 
-                #If the list is finished, run the next list. If player is required to move for the next scene
-                #check movementTrue and set the sceneMove to true
-            if (len(currentTextSet) <= self.counter):
-                if self.nextSceneToggle == True:
-                    self.sceneText += 1
-                    self.counter = 0
-                self.sceneMove = movementTrue
-                self.nextSceneToggle = False
-            # print(str(self.sceneText) + " " + str(self.counter) + " " + str(self.nextSceneToggle))
-            #When all conditions are checked, set the dialogue to from the current scene and counter
-            dialogueBox.setDialogue(currentTextSet, self.counter)
-        #If there is a gameState and the dialogueList (aka all the scenes) are finished, set the next state
-        if gameState != None and len(dialogueList) < self.sceneText:
+                self.nextLine += 1 
+
+            #If the part is finished, run the next part in the list.
+            #In order to run the next part, check if the nextScene can be run and the player is no longer moving
+            if (len(currentDialogueLines) <= self.nextLine):
+                if self.nextSceneToggle == True and self.sceneMove == False:
+                    self.dialoguePart += 1
+                    self.nextLine = 0
+                #Turn off the nextSceneToggle for the next part
+                self.nextSceneToggle = False                
+
+            #When all conditions are checked, display the lines of dialogue onto the dialogueBox
+            dialogueBox.setDialogue(currentDialogueLines, self.nextLine)
+
+        #If there is a gameState and the dialogueList (aka all the dialogue parts) are finished, set the next state to run the next scene
+        if gameState != None and len(dialogueList) <= self.dialoguePart:
             self.gameStatus.setState(gameState)
-        print(str(self.sceneText) + " "  + str(self.sceneMove) + " " +str(self.nextSceneToggle))
 
     def run(self):
-        #Set where the player will appear on the scene when this class runs
+        #Player Location when scene starts
         if self.setPlayerPosition == True:
             self.playerClass.x = 300
             self.playerClass.y = 250
             self.setPlayerPosition = False
 
-        #Spawn a trigger block to que the next sceneText
+        #Display background
+        self.display.blit(tempWin.backgroundList[3][0], (0 ,0))
+        #Spawn a trigger block to signal the next dialoguePart
         NPC = pygame.Rect(600, 500, 100, 50)
+        pygame.draw.rect(self.display, "red", NPC)
 
         #Set up Dialogue
         testBox = dialogueBox("black", self.profileSet, self.fontSet)
-        textOne = ["WOAH! Earth is bigger than I thought", 
+        scene1_1 = ["WOAH! Earth is bigger than I thought", 
                    "Base on the travel guide, there should be squawkers here",
                    "Let's find a good spot to lay down"]
-        textTwo = ["Huh, what are all these hard \"rocks\"?", 
+        scene1_2 = ["Huh, what are all these hard \"rocks\"?", 
                    "OUCH! It got on my feet!", 
                    "Do humans really live in these conditions??",
                    "Hmm, if I want to watch the squakers...",
                    "...then I have to clear the area", 
                    "Let's clean up a bit. It shouldn't take too long, right?"]
-        dialogueList = [textOne, textTwo]
+        dialogueList = [scene1_1, scene1_2] 
         
-        self.display.blit(tempWin.backgroundList[3][0], (0 ,0))
-        pygame.draw.rect(self.display, "red", NPC)
-
-        self.movementScene()
-       
-        if pygame.Rect.colliderect(self.playerClass.hitbox, NPC) == True:
+        #First play scene1_1. After it finish, allow player to move
+        if self.dialoguePart < 1:
+            self.sceneMove = True
+            #Wait until the player touches the NPC rectangle to play scene1_2
+            if pygame.Rect.colliderect(self.playerClass.hitbox, NPC) == True:
+                self.sceneMove = False
+                self.nextSceneToggle = True
+        #After both dialogue parts are finished, run the level
+        if self.dialoguePart == 1:
             self.sceneMove = False
             self.nextSceneToggle = True
-    
-        self.loopDialogue("runLevel", dialogueList, testBox, True)
+
+        self.movementScene()
+        self.loopDialogue("runLevel", dialogueList, testBox)
+        if len(dialogueList) <= self.dialoguePart:
+            playedScenes.append(newScenes.remove('sceneOne'))
+        
 
         pygame.display.flip()
 
@@ -273,8 +295,8 @@ class prologue(sceneOne):
 
         #Tracks scene progression/dialogue
         self.sceneMove = False
-        self.sceneText = 0
-        self.counter = 0
+        self.dialoguePart = 0
+        self.nextLine = 0
 
         #Animations for the scene
         self.currentFrame = 0
@@ -284,25 +306,28 @@ class prologue(sceneOne):
         self.setPlayerPosition = True
         self.nextSceneToggle = None
 
-
     def run(self):
-        #Set player location on scene when this class runs
+        #Set player location for the scene
+        #The player is currently offscreen
         if self.setPlayerPosition == True:
             self.playerClass.x = -200
             self.playerClass.y = 250
             self.setPlayerPosition = False
 
+        #Set up background
+        self.display.fill("black")
+
         #Create the UFO to board
         UFO = pygame.Rect(740, 150, 200, 100)
-        
+        #Draw the UFO. When the player is on it, the next scene will play
+        pygame.draw.rect(self.display, "grey", UFO)
 
-        self.display.fill("black")
+        #Set up dialogue
         prologueBox = dialogueBox("black", self.profileSet, self.fontSet)
-        prologueBox2 = dialogueBox("black", self.profileSet, self.fontSet)
-        prologue1 = ["Humans are selfish creatures", 
+        prologue0 = ["Humans are selfish creatures", 
                      "They never knew that beyond the Earth...", 
                      "there were ALIENS!!"]
-        prologue2 = ["Oh sorry. I forgot to introduce myself",
+        prologue1 = ["Oh sorry. I forgot to introduce myself",
                      "Hi there! I'm Meep, commander of the Shuttle buggy",
                      "Shuttle buggy is the best space ship accross the galaxy!",
                      "I've been an excellence driver...",
@@ -311,34 +336,43 @@ class prologue(sceneOne):
                      "a paid vacation! WOOHOOO!!",
                      "I have dreamt of coming to Earth since I was a blob",
                      "Join me on my vacation why don't you?"]
-        prologue3 = ["Let's board the Shuttle Buggy!",
-                     "Use the WASD keys to move"]
-        prologue4 = ["ALL ABOARD THE SHUTTLE BUGGY!",
-                     "Safety not included"]
-        dialogueList = [prologue1, prologue2]
-        #Play the first two prologue sets
-        self.loopDialogue(None, dialogueList, prologueBox, False)
-        #When the first two is finished, play the 3rd prologue set
-        if self.sceneText > 1:
-            dialogueList.append(prologue3)
-            dialogueList.append(prologue4)
-            self.loopDialogue("sceneOne", dialogueList, prologueBox2, True)
+        prologue2 = ["Let's get on the Shuttle Buggy!",
+                     "Use the WASD keys to move toward the ship"]
+        prologue3 = ["ALL ABOARD THE SHUTTLE BUGGY!",
+                     "your safety is not guaranteed",
+                     "the taxi service is not responsible for lost items,",
+                     "limbs, or children.",
+                     "Sit tight and relax!"]
+        dialogueList = [prologue0, prologue1, prologue2, prologue3]
+
+
+        #Play the first three prologue sets
+        if self.dialoguePart < 2:
+            # #Run the dialogue without an ending scene
+            # self.loopDialogue(None, dialogueList, prologueBox)
+
+            #Waits for prologue0 to finish, then makes the character appear across the screen
+            if self.nextSceneToggle == False and self.playerClass.x < 300:
+                self.playerClass.x += 15
+            #When the player finish moving, run prologue1 and prologue2
+            elif self.playerClass.x >= 300:
+                self.nextSceneToggle = True
+
+        #After prologue 0,1,2, run a movementScene and prologue 3
+        else:
+            #Allow the player to move after prologue 2
+            self.sceneMove = True
             
-
-
-        #After prologue1, the player moves into the screen
-        if self.nextSceneToggle == False and self.playerClass.x < 300:
-            self.playerClass.x += 15
-        elif self.playerClass.x >= 300:
-            self.nextSceneToggle = True
-
-        #Draw the UFO. When the player is on it, the next scene will play
-        pygame.draw.rect(self.display, "grey", UFO)
-        if pygame.Rect.colliderect(self.playerClass.hitbox, UFO) == True:
-            self.sceneMove = False
-            self.nextSceneToggle = True
-
+            #Wait for the player to reach the ship, then play prologue3
+            if pygame.Rect.colliderect(self.playerClass.hitbox, UFO) == True:
+                self.sceneMove = False
+                self.nextSceneToggle = True
+                
         self.movementScene()
+        self.loopDialogue("sceneOne", dialogueList, prologueBox)
+        if len(dialogueList) <= self.dialoguePart:
+            playedScenes.append(newScenes.remove('playPrologue'))
+        
 
         pygame.display.flip()
 

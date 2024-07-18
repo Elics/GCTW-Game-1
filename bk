@@ -1,9 +1,10 @@
+#good backup ---
+
+
 import pygame
 import random
-import time
 from cut_scene import IntroCutScene, LevelCompletedCutScene
 from trash import Trash
-from treasure import Treasure
 from collector import Collector
 from menu import Menu
 
@@ -17,24 +18,17 @@ pygame.display.set_caption("First Game")
 # Images
 walkRight = [pygame.image.load('Images/Collectors/R1.png'), pygame.image.load('Images/Collectors/R2.png'), pygame.image.load('Images/Collectors/R3.png'), pygame.image.load('Images/Collectors/R4.png')]
 walkLeft = [pygame.image.load('Images/Collectors/L1.png'), pygame.image.load('Images/Collectors/L2.png'), pygame.image.load('Images/Collectors/L3.png'), pygame.image.load('Images/Collectors/L4.png')]
-bg = pygame.image.load('Images/Backgrounds/bg.jpg')
+bg = pygame.image.load('Images/Backgrounds/Field 1.png')
 
 # Load and scale images
 BananaSkin = pygame.image.load('Images/Trashes/BananaSkin.png').convert_alpha()
 BananaSkin = pygame.transform.scale(BananaSkin, (25, 25))  # Scale the image to desired size
 
-TreasureImage = pygame.image.load('Images/Trashes/Apple.png').convert_alpha()
-TreasureImage = pygame.transform.scale(TreasureImage, (25, 25))  # Scale the image to desired size
-
-# Initialize Trash and Treasure Groups
+# Initialize Trash Group
 trash_group = pygame.sprite.Group()
 for _ in range(8):
     trash = Trash((random.randint(0, SCREENWIDTH - 25), random.randint(0, SCREENHEIGHT - 25)), BananaSkin)
     trash_group.add(trash)
-
-treasure_group = pygame.sprite.Group()
-last_treasure_spawn_time = time.time()
-treasure_spawn_interval = 10  # seconds
 
 clock = pygame.time.Clock()
 
@@ -57,8 +51,6 @@ def redrawGameWindow():
     man.draw(screen)
     for trash in trash_group:
         trash.draw(screen)
-    for treasure in treasure_group:
-        treasure.draw(screen)
     pygame.display.update()
 
 # Main game loop
@@ -85,7 +77,7 @@ while running:
                 elif quit_button_rect.collidepoint(event.pos):
                     running = False
             elif game_state == "play":
-                menu_text_rect = pygame.Rect(10, 10, 100, 50)
+                menu_text_rect = pygame.Rect(10, 10, 50, 50)
                 if menu_text_rect.collidepoint(event.pos):
                     game_state = 'menu'
             elif game_state == 'options':
@@ -101,31 +93,11 @@ while running:
         menu.draw_menu()
     elif game_state == "play":
         man.update()
-
-        # Check for collisions with trash
         for trash in trash_group:
             if man.rect.colliderect(trash.rect):
                 trash.hit()
                 trash.kill()
                 score += 10
-
-        # Check for collisions with treasure
-        for treasure in treasure_group:
-            if man.rect.colliderect(treasure.rect):
-                treasure.hit()
-                treasure.kill()
-                score += 50
-
-        # Update treasure group and remove expired treasures
-        for treasure in treasure_group:
-            treasure.update()
-
-        # Spawn new treasure if enough time has passed
-        current_time = time.time()
-        if current_time - last_treasure_spawn_time > treasure_spawn_interval:
-            new_treasure = Treasure((random.randint(0, SCREENWIDTH - 25), random.randint(0, SCREENHEIGHT - 25)), TreasureImage, duration=5)
-            treasure_group.add(new_treasure)
-            last_treasure_spawn_time = current_time
 
         if not trash_group:
             game_state = 'level_completed'

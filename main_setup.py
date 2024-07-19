@@ -203,7 +203,7 @@ spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundar
 #~~ Game Statuses ~~
 #Initialize the game status class and play the starting screen first
 #I place this here to access the windowDetails variable, which is used to display backgrounds in level.py
-gameStatus = level.gameStatus("shop")
+gameStatus = level.gameStatus("start")
 
 #Initialize all the states
 #NOTE: Fonts are placed in a list
@@ -211,8 +211,8 @@ start = level.startGame(gameStatus)
 menu = level.menuScreen(gameStatus)
 end = level.gameEnd(gameStatus)
 shop = level.upgradeShop(gameStatus, char.speed, baseTime, 0, [score_font])
-runLevel = level.runLevel(gameStatus, levelsList[currentLevel])
-selectLevel = level.levelSelection(gameStatus, [subtitle_font])
+runLevel = level.runLevel(gameStatus, levelsList[currentLevel], char)
+selectLevel = level.selectLevel(gameStatus, [subtitle_font])
 
 #All Cutscenes
 playPrologue = level.prologue(gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
@@ -221,7 +221,7 @@ sceneOne = level.sceneOne(gameStatus, [name_font, instruction_font], animations,
 
 #Add the states to the gameStates dictionary
 #This allows the gameStatus class to know which state to call
-gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "runLevel":runLevel, "sceneOne":sceneOne, "playPrologue":playPrologue} 
+gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "runLevel":runLevel, "selectLevel":selectLevel, "sceneOne":sceneOne, "playPrologue":playPrologue} 
 
 while run:
     #Loading time for game

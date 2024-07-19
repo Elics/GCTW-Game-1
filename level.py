@@ -10,7 +10,7 @@ tempWin = window.Window("Our Earth")
 
 # ~~Scene Tracker ~~
 #Tracks all new and played scenes 
-newScenes = ["playPrologue", "sceneOne"]
+newScenes = ["playPrologue", "runLevel"]
 #When a scene has been played, it will be popped from the newScenes and appended to playedScenes
 playedScenes = []
 
@@ -45,14 +45,10 @@ class startGame():
 
         if pygame.key.get_pressed()[pygame.K_SPACE]:
             pygame.time.delay(300)
-            if(not newScenes):
-                #NOTE: Create a menu selection interface to allow the player to choose where to start off
-                self.gameStatus.setState("runLevel")
-            else:    
-                self.gameStatus.setState(newScenes[0])
+            self.gameStatus.setState("selectLevel")
 
 #Level Selection Screen: Replay any cutscene or level
-class levelSelection():
+class selectLevel():
     def __init__(self, gameStatus, fontSet):
         self.display = tempWin.currentWindow
         self.gameStatus = gameStatus
@@ -61,13 +57,25 @@ class levelSelection():
 
     def run(self):
         self.display.blit(tempWin.backgroundList[7][0], (0,0))
-
-        pygame.display.flip()
+        prologue_rect = pygame.Rect(300,300, 100,100)
+        sceneOne_rect = pygame.Rect(500,300, 100,100)
+        pygame.draw.rect(self.display, "red", prologue_rect)
+        pygame.draw.rect(self.display, "red", sceneOne_rect)
 
         if pygame.key.get_pressed()[pygame.K_a] and self.levelIndex > 0:
             self.levelIndex -= 1
-        elif pygame.key.getpressed()[pygame.K_d] and self.levelIndex < len(playedScenes):
+        elif pygame.key.get_pressed()[pygame.K_d] and self.levelIndex < len(newScenes) - 1:
             self.levelIndex += 1
+        elif pygame.key.get_pressed()[pygame.K_SPACE]:
+            self.gameStatus.setState(newScenes[self.levelIndex])
+
+        if self.levelIndex == 0:
+            pygame.draw.rect(self.display, "pink", prologue_rect)
+        elif self.levelIndex == 1:
+            pygame.draw.rect(self.display, "pink", sceneOne_rect)
+        
+        pygame.display.flip()
+        
 
 #Menu Screen
 class menuScreen():
@@ -152,12 +160,20 @@ class gameEnd():
       
 #Runs the collection game mode. To run, I simply toggle the variable collectionMode
 class runLevel():
-    def __init__(self, gameStatus, levelNumber):
+    def __init__(self, gameStatus, levelNumber, playerClass):
         self.gameStatus = gameStatus 
         self.levelNumber = levelNumber
+        self.playerClass = playerClass
+        self.setPlayerPosition = True
+
     def run(self):
         if self.levelNumber == 1:
             tempWin.currentWindow.blit(tempWin.backgroundList[3][0], (0,0))
+            if self.setPlayerPosition == True:
+                self.playerClass.x = 600
+                self.playerClass.y = 400
+                self.setPlayerPosition = False
+
 
 # ~~Cutscenes~~
 class dialogueBox():
@@ -297,9 +313,6 @@ class sceneOne():
 
         self.movementScene()
         self.loopDialogue("runLevel", dialogueList, testBox)
-        if len(dialogueList) <= self.dialoguePart:
-            playedScenes.append(newScenes.remove('sceneOne'))
-        
 
         pygame.display.flip()
 
@@ -396,9 +409,6 @@ class prologue(sceneOne):
                 
         self.movementScene()
         self.loopDialogue("sceneOne", dialogueList, prologueBox)
-        if len(dialogueList) <= self.dialoguePart:
-            playedScenes.append(newScenes.remove('playPrologue'))
-        
 
         pygame.display.flip()
 

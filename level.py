@@ -102,28 +102,36 @@ class menuScreen():
 
 #Displays Upgrade Shop after every level
 class upgradeShop():
-    def __init__(self, gameStatus, speed, time, coins):
+    def __init__(self, gameStatus, speed, time, coins, fontSet):
         self.display = tempWin.currentWindow
         self.gameStatus = gameStatus
         self.speedBuff = speed
         self.timeBuff = time
         self.coins = coins
+        self.fontSet = fontSet
         self.selected = None
+        self.price = 10
 
     def run(self):
+        #Create a text to display the price
+        price_txt = self.fontSet[0].render(str(self.price), True, "white")
+
         #Background Display
         #When an upgrade is selected, change the background to show it highlighted
         #Each upgrade button corresponds to an integer
+        #Only display the price if an upgrade is selected
         if (self.selected == 0):
             self.display.blit(tempWin.backgroundList[4][0], (0,0))
+            tempWin.addUI(price_txt, (50, 50))
         elif (self.selected == 1):
             self.display.blit(tempWin.backgroundList[5][0], (0,0))
+            tempWin.addUI(price_txt, (50, 50))
         elif (self.selected == 2):
             self.display.blit(tempWin.backgroundList[6][0], (0,0))
 
         #Display Coins
         #Coins Display Text
-        coins_txt = self.fontSet[1].render(str(self.coins), False, "white")
+        coins_txt = self.fontSet[0].render(str(self.coins), True, "white")
         tempWin.addUI(coins_txt, (50, 530))
 
         pygame.display.flip()
@@ -176,6 +184,9 @@ class dialogueBox():
             dialogue_txt = self.fontSet[0].render(textSet[nextLine], True, "white")
             tempWin.addUI(dialogue_txt, (200, 500))
         
+#Summary: The player lands on earth at a beach. They are excited to explore and witness seagulls for the first time.
+#However, they are stopped by the massive amount of trash filling the beach. To remedy the situation, they start to clean up
+#for the first time.
 class sceneOne():
     def __init__(self, gameStatus, fontSet, animationSet, profileSet, playerClass, playerSheet, scale, windowDimensions):
         self.display = tempWin.currentWindow
@@ -292,6 +303,8 @@ class sceneOne():
 
         pygame.display.flip()
 
+#Summary: The player is introducted to their avatar. They are an alien who works as a taxi driver.
+#Due to the character's strong work ethic, they were able to get a free vacation and decided to visit Earth.
 #Inherits the sceneOne class methods
 class prologue(sceneOne):
     def __init__(self, gameStatus, fontSet, animationSet, profileSet, playerClass, playerSheet, scale, windowDimensions):
@@ -348,19 +361,19 @@ class prologue(sceneOne):
                      "So much so that my boss decided to give me...",
                      "a paid vacation! WOOHOOO!!",
                      "I have dreamt of coming to Earth since I was a blob",
-                     "Join me on my vacation why don't you?"]
-        prologue2 = ["Let's get on the Shuttle Buggy!",
+                     "Join me on my vacation why don't you?",
+                     "Let's get on the Shuttle Buggy!",
                      "Use the WASD keys to move toward the ship"]
-        prologue3 = ["ALL ABOARD THE SHUTTLE BUGGY!",
+        prologue2 = ["ALL ABOARD THE SHUTTLE BUGGY!",
                      "your safety is not guaranteed",
                      "the taxi service is not responsible for lost items,",
                      "limbs, or children.",
                      "Sit tight and relax!"]
-        dialogueList = [prologue0, prologue1, prologue2, prologue3]
+        dialogueList = [prologue0, prologue1, prologue2]
 
 
         #Play the first three prologue sets
-        if self.dialoguePart < 2:
+        if self.dialoguePart < 1:
             # #Run the dialogue without an ending scene
             # self.loopDialogue(None, dialogueList, prologueBox)
 

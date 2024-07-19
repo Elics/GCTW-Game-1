@@ -92,7 +92,7 @@ name_font = pygame.font.SysFont('Nunito', 40, True)
 #Index to loop through available upgrades
 upgradeIndex = 0
 #A list to store all coin values collected
-coinsList = [0]
+coinsList = [10]
 #A List of all Upgrades
  #Upgrades
     # char.speed += 10
@@ -203,14 +203,14 @@ spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundar
 #~~ Game Statuses ~~
 #Initialize the game status class and play the starting screen first
 #I place this here to access the windowDetails variable, which is used to display backgrounds in level.py
-gameStatus = level.gameStatus("start")
+gameStatus = level.gameStatus("shop")
 
 #Initialize all the states
 #NOTE: Fonts are placed in a list
 start = level.startGame(gameStatus)
 menu = level.menuScreen(gameStatus)
 end = level.gameEnd(gameStatus)
-shop = level.upgradeShop(gameStatus, char.speed, baseTime, 0)
+shop = level.upgradeShop(gameStatus, char.speed, baseTime, 0, [score_font])
 runLevel = level.runLevel(gameStatus, levelsList[currentLevel])
 selectLevel = level.levelSelection(gameStatus, [subtitle_font])
 
@@ -284,6 +284,9 @@ while run:
         
         #Highlights the corresponding selection made
         shop.selected = upgradeIndex
+        #Updates the price depending which index is 
+        if upgradeIndex < 2:
+            shop.price = 10*int(upgradeList[upgradeIndex] / 10)
 
         #After confirming the index with SPACE, check if the current status is below 60
         #Then add the upgrade to the selected index
@@ -310,6 +313,7 @@ while run:
                     stageCounter = baseTime
                     shop.speedBuff = char.speed
                     shop.timeBuff = baseTime  
+                    
 
                 #If the player does not have enough coins for the upgrade
                 else:

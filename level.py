@@ -33,10 +33,9 @@ class gameStatus():
 
 #The starting screen
 class startGame():
-    def __init__(self, gameStatus, fontSet):
+    def __init__(self, gameStatus):
         self.display = tempWin.currentWindow
         self.gameStatus = gameStatus
-        self.fontSet = fontSet
 
     def run(self):
         self.display.blit(tempWin.backgroundList[1][0], (0,0))
@@ -52,12 +51,29 @@ class startGame():
             else:    
                 self.gameStatus.setState(newScenes[0])
 
-#Menu Screen
-class menuScreen():
+#Level Selection Screen: Replay any cutscene or level
+class levelSelection():
     def __init__(self, gameStatus, fontSet):
         self.display = tempWin.currentWindow
         self.gameStatus = gameStatus
         self.fontSet = fontSet
+        self.levelIndex = 0
+
+    def run(self):
+        self.display.blit(tempWin.backgroundList[7][0], (0,0))
+
+        pygame.display.flip()
+
+        if pygame.key.get_pressed()[pygame.K_a] and self.levelIndex > 0:
+            self.levelIndex -= 1
+        elif pygame.key.getpressed()[pygame.K_d] and self.levelIndex < len(playedScenes):
+            self.levelIndex += 1
+
+#Menu Screen
+class menuScreen():
+    def __init__(self, gameStatus):
+        self.display = tempWin.currentWindow
+        self.gameStatus = gameStatus
         self.select = None
         self.width = tempWin.winWidth
         self.height = tempWin.winHeight
@@ -86,10 +102,9 @@ class menuScreen():
 
 #Displays Upgrade Shop after every level
 class upgradeShop():
-    def __init__(self, gameStatus, fontSet, speed, time, coins):
+    def __init__(self, gameStatus, speed, time, coins):
         self.display = tempWin.currentWindow
         self.gameStatus = gameStatus
-        self.fontSet = fontSet
         self.speedBuff = speed
         self.timeBuff = time
         self.coins = coins
@@ -115,10 +130,9 @@ class upgradeShop():
         
 #The ending scene
 class gameEnd():
-    def __init__(self, gameStatus, fontSet):
+    def __init__(self, gameStatus):
         self.display = tempWin.currentWindow
         self.gameStatus = gameStatus 
-        self.fontSet = fontSet
 
     def run(self):
         self.display.blit(tempWin.backgroundList[2][0], (0,0))
@@ -162,7 +176,6 @@ class dialogueBox():
             dialogue_txt = self.fontSet[0].render(textSet[nextLine], True, "white")
             tempWin.addUI(dialogue_txt, (200, 500))
         
-    
 class sceneOne():
     def __init__(self, gameStatus, fontSet, animationSet, profileSet, playerClass, playerSheet, scale, windowDimensions):
         self.display = tempWin.currentWindow

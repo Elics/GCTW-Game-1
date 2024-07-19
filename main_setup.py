@@ -207,11 +207,12 @@ gameStatus = level.gameStatus("start")
 
 #Initialize all the states
 #NOTE: Fonts are placed in a list
-start = level.startGame(gameStatus, [title_font, instruction_font])
-menu = level.menuScreen(gameStatus, [title_font, subtitle_font])
-end = level.gameEnd(gameStatus, [title_font, subtitle_font])
-shop = level.upgradeShop(gameStatus, [title_font, subtitle_font, instruction_font], char.speed, baseTime, 0)
+start = level.startGame(gameStatus)
+menu = level.menuScreen(gameStatus)
+end = level.gameEnd(gameStatus)
+shop = level.upgradeShop(gameStatus, char.speed, baseTime, 0)
 runLevel = level.runLevel(gameStatus, levelsList[currentLevel])
+selectLevel = level.levelSelection(gameStatus, [subtitle_font])
 
 #All Cutscenes
 playPrologue = level.prologue(gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))

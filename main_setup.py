@@ -162,7 +162,7 @@ def redrawGameWindow(widthLowerBoundary, widthUpperBoundary, heightLowerBoundary
         if trash.treasure == 1:
             pygame.draw.rect(win.currentWindow, "blue", trash.hitbox)
         else:    
-            pygame.draw.rect(win.currentWindow, "red", trash.hitbox)
+            win.currentWindow.blit("images\\Trash\\07-Styrofoam.png", (trash.x, trash.y))
 
     #Display score
     score_txt = score_font.render("Collected: " + str(collectPile[0]), True, "black")

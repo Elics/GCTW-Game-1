@@ -5,12 +5,16 @@ import random
 #The trash object should be smaller than the player
 #widthBounds and heightBounds dictate where the trash can spawn
 
+levelOneTrash = ["images\\Trash\\07-Styrofoam.png"]
+
 class Trash():
     def __init__(self, playerWidth, playerHeight, widthLowerBound, widthUpperBound, heightLowerBound, heightUpperBound):
         #Randomly generate width and height
         #NOTE: Since the trashsprites are likely drawn by hand, the random generation of the dimensions will be replaced
         self.width = random.randint(20, playerWidth - 20)
         self.height =  random.randint(20, playerHeight - 20)
+
+        self.image = levelOneTrash[0]
 
         #Randomly generate the xy-coordinates
         self.x = random.randint(widthLowerBound, widthUpperBound)

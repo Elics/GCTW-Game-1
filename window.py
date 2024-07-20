@@ -44,10 +44,10 @@ class Window():
         #Level 1: Beach.png, Lower Bounds = 200
     #Converts the images and resize them. Then adds them to the backgroundList for use
     def addBackground(self):
-        for image in self.filesList:
-            background = pygame.image.load(image[0])
+        for file in self.filesList:
+            background = pygame.image.load(file[0])
             background = pygame.transform.smoothscale(background.convert_alpha(), (self.winWidth, self.winHeight))
-            self.backgroundList.append((background, image[1]))
+            self.backgroundList.append((background, file[1]))
 
     #Update the scale of all backgrounds in the backgroundsList
     def updateBackground(self):

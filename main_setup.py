@@ -92,7 +92,7 @@ menu_font = pygame.font.SysFont('Verdana', 80, False)
 #Index to loop through available upgrades
 upgradeIndex = 0
 #A list to store all coin values collected
-coinsList = [10]
+coinsList = [0]
 #A List of all Upgrades
  #Upgrades
     # char.speed += 10
@@ -122,6 +122,13 @@ def spawnTrash(amount, widthLowerBoundary, widthUpperBoundary, heightLowerBounda
     #A separate list is needed as the collidelist() method only takes a list of rectangles.
     for i in trashPile:
         trashHitboxes.append(i.hitbox)
+
+def clearTrash():
+    for i in range(len(trashPile)):
+        trashPile.pop()
+
+    for j in range(len(trashHitboxes)):
+        trashHitboxes.pop()
 
 #Checks the collision between trash objects and the player
 #When they collide, replace with a new trash object, which will change shape and spawn location
@@ -162,7 +169,7 @@ def redrawGameWindow(widthLowerBoundary, widthUpperBoundary, heightLowerBoundary
         if trash.treasure == 1:
             pygame.draw.rect(win.currentWindow, "blue", trash.hitbox)
         else:    
-            win.currentWindow.blit("images\\Trash\\07-Styrofoam.png", (trash.x, trash.y))
+            win.currentWindow.blit(trash.image, (trash.x, trash.y))
 
     #Display score
     score_txt = score_font.render("Collected: " + str(collectPile[0]), True, "black")
@@ -203,7 +210,7 @@ spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundar
 #~~ Game Statuses ~~
 #Initialize the game status class and play the starting screen first
 #I place this here to access the windowDetails variable, which is used to display backgrounds in level.py
-gameStatus = level.gameStatus("start")
+gameStatus = level.gameStatus("runLevel")
 
 #Initialize all the states
 #NOTE: Fonts are placed in a list
@@ -260,6 +267,10 @@ while run:
             #When closing the Menu, updates the game boundaries according to the screen size
             widthBoundary =  menu.width - char.hitbox[2] - char_s
             heightBoundary = menu.height - char.hitbox[3]- char_s
+            #Clear the current set of trash
+            clearTrash()
+            spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
+
             #Return to the previous state
             gameStatus.setState(gameStatus.getPreviousState())
     #If Q is pressed, return the End Screen

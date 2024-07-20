@@ -50,6 +50,8 @@ class Sprite():
             for i in range(set):
                 self.animations[setIndex].append(self.getFrame(i, 0, setIndex * 32, 32, 32))
             setIndex += 1
+        #After all the animations are added to the list, reset the setIndex counter
+        setIndex = 0
 
         return self.animations
     

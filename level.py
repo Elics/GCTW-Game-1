@@ -2,6 +2,7 @@
 #Each level or cutscene, which will be called states, is defined in its own class
 import pygame
 import window
+import sprite
 
 #NOTE: Add a way to track already played scenes/levels
 
@@ -57,10 +58,12 @@ class selectLevel():
 
     def run(self):
         self.display.blit(tempWin.backgroundList[7][0], (0,0))
-        prologue_rect = pygame.Rect(300,300, 100,100)
-        sceneOne_rect = pygame.Rect(500,300, 100,100)
+        prologue_rect = pygame.Rect(200,300, 200,100)
+        sceneOne_rect = pygame.Rect(500,300, 200,100)
         pygame.draw.rect(self.display, "red", prologue_rect)
         pygame.draw.rect(self.display, "red", sceneOne_rect)
+        prologue_txt = self.fontSet[0].render("Prologue", True, "white")
+        levelOne_txt = self.fontSet[0].render("Level One", True, "white")
 
         if pygame.key.get_pressed()[pygame.K_a] and self.levelIndex > 0:
             self.levelIndex -= 1
@@ -73,6 +76,9 @@ class selectLevel():
             pygame.draw.rect(self.display, "pink", prologue_rect)
         elif self.levelIndex == 1:
             pygame.draw.rect(self.display, "pink", sceneOne_rect)
+
+        tempWin.addUI(prologue_txt, (225,325))
+        tempWin.addUI(levelOne_txt, (525,325))
         
         pygame.display.flip()
         

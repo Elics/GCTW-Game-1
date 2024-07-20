@@ -19,7 +19,7 @@ char_y = 0
 #Player's Initial Speed
 char_s = 15
 #Character Model Scale
-scale = 6 
+scale = 6
 
 #~~ Stage Timer ~~
 #Initialize clock object to track time
@@ -210,7 +210,7 @@ spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundar
 #~~ Game Statuses ~~
 #Initialize the game status class and play the starting screen first
 #I place this here to access the windowDetails variable, which is used to display backgrounds in level.py
-gameStatus = level.gameStatus("runLevel")
+gameStatus = level.gameStatus("start")
 
 #Initialize all the states
 #NOTE: Fonts are placed in a list
@@ -267,8 +267,10 @@ while run:
             #When closing the Menu, updates the game boundaries according to the screen size
             widthBoundary =  menu.width - char.hitbox[2] - char_s
             heightBoundary = menu.height - char.hitbox[3]- char_s
+
             #Clear the current set of trash
             clearTrash()
+            #Respawn trash base on the window size
             spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
 
             #Return to the previous state

@@ -19,8 +19,8 @@ class Trash():
         
         #Scale the trash base on the player's width and height
         #NOTE: Since the trashsprites are likely drawn by hand, the random generation of the dimensions will be replaced
-        self.width = int(playerWidth * 0.8)
-        self.height =  int(playerHeight* 0.8)
+        self.width = int(playerWidth * 1.5)
+        self.height =  int(playerHeight * 0.8)
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
     
         #Randomly generate the xy-coordinates

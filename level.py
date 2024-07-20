@@ -79,9 +79,10 @@ class selectLevel():
 
 #Menu Screen
 class menuScreen():
-    def __init__(self, gameStatus):
+    def __init__(self, gameStatus , fontSet):
         self.display = tempWin.currentWindow
         self.gameStatus = gameStatus
+        self.fontSet = fontSet
         self.select = None
         self.width = tempWin.winWidth
         self.height = tempWin.winHeight
@@ -89,20 +90,28 @@ class menuScreen():
     def run(self):
         self.display.blit(tempWin.backgroundList[0][0], (0,0))
 
+        currentSize = tempWin.windowSizes[tempWin.screenSizeIndex]
+
+        #Display width and height
+        windowSize_txt = self.fontSet[0].render(str(currentSize[0]) + "x" + str(currentSize[1]), True, "black")
+        tempWin.addUI(windowSize_txt, (300,380))
+
         #Toggle screen size and updates the backgrounds accordingly
         #3 different sizes: Small, Default, Large
-        if pygame.key.get_pressed()[pygame.K_h]:
-            if tempWin.screenSizeIndex + 1 < len(tempWin.windowSizes):
-                tempWin.screenSizeIndex += 1
-                pygame.time.delay(200)
-            else:
-                tempWin.screenSizeIndex = 0
+        if pygame.key.get_pressed()[pygame.K_d] and tempWin.screenSizeIndex < len(tempWin.windowSizes) - 1:
+            tempWin.screenSizeIndex += 1
+            pygame.time.delay(200)
+        elif pygame.key.get_pressed()[pygame.K_a] and tempWin.screenSizeIndex > 0:
+            tempWin.screenSizeIndex -= 1
+            pygame.time.delay(200)
+        elif pygame.key.get_pressed()[pygame.K_SPACE]:
             tempWin.setWindow()
             tempWin.updateBackground()
-            #After the sizes are adjusted, update the width and height variables 
-            #These variables will be accessed and updated in main.py
-            self.width = tempWin.winWidth
-            self.height = tempWin.winHeight
+            
+        #After the sizes are adjusted, update the width and height variables 
+        #These variables will be accessed and updated in main.py
+        self.width = tempWin.winWidth
+        self.height = tempWin.winHeight
 
         #NOTE: Render buttons when pressed
 

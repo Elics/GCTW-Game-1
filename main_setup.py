@@ -86,7 +86,7 @@ title_font = pygame.font.SysFont('Arial', 80, True)
 subtitle_font = pygame.font.SysFont('Arial', 40, False)
 instruction_font = pygame.font.SysFont('Arial', 20, False)
 name_font = pygame.font.SysFont('Nunito', 40, True)
-# dialogue_font = pygame.font.SysFont('')
+menu_font = pygame.font.SysFont('Verdana', 80, False)
 
 #~~ Shop Features ~~
 #Index to loop through available upgrades
@@ -208,7 +208,7 @@ gameStatus = level.gameStatus("start")
 #Initialize all the states
 #NOTE: Fonts are placed in a list
 start = level.startGame(gameStatus)
-menu = level.menuScreen(gameStatus)
+menu = level.menuScreen(gameStatus, [menu_font])
 end = level.gameEnd(gameStatus)
 shop = level.upgradeShop(gameStatus, char.speed, baseTime, 0, [score_font])
 runLevel = level.runLevel(gameStatus, levelsList[currentLevel], char)

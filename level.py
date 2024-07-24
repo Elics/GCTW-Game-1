@@ -184,9 +184,18 @@ class runLevel():
                 self.playerClass.x = 600
                 self.playerClass.y = 400
                 self.setPlayerPosition = False
-        elif self.levelNumber == 2:
+        elif self.levelNumber == 0:
             tempWin.currentWindow.fill("white")
 
+class levelComplete():
+    def __init__(self, gameStatus, playerClass):
+        self.gameStatus = gameStatus 
+        self.levelNumber = None
+        self.playerClass = playerClass
+        self.setPlayerPosition = True
+
+    def run(self):
+        tempWin.currentWindow.fill("purple")
 
 
 # ~~Cutscenes~~

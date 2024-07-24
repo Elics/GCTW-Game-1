@@ -100,9 +100,13 @@ coinPouch = 0
 upgradeList = [char.speed, baseTime]
 
 #~~ Level Features ~~
-#A list and indicator of the levels
-levelsList = [1]
-currentLevel = 2
+#A list of levels and the minimum collection goal
+levelsList = {
+    0:2,
+    1:[5]
+    }
+#Indicate the current level
+currentLevel = 1
 #Stores all the surfaces/trash sprites
 trashPile = []
 #Contains the rectangles of all the generated trash
@@ -111,8 +115,10 @@ trashHitboxes = []
 collectPile = 0
 #Tracks score on each level
 scoresList = []
+scoreIndex = 0
 #Allow trash to spawn on the map
 spawnTrashToggle = True
+trashSpawnRate = 5
 
 #~~~ Functions ~~~ 
 #Create and add trash objects to trashPile. Additionally add their hitboxes to trashHitboxes
@@ -231,6 +237,7 @@ end = level.gameEnd(gameStatus)
 shop = level.upgradeShop(gameStatus, char.speed, baseTime, 0, [score_font])
 runLevel = level.runLevel(gameStatus, char)
 selectLevel = level.selectLevel(gameStatus, [subtitle_font])
+levelComplete = level.levelComplete(gameStatus, char)
 
 #All Cutscenes
 playPrologue = level.prologue(gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
@@ -240,7 +247,7 @@ tutorial = level.tutorial(gameStatus, [name_font, instruction_font], animations,
 
 #Add the states to the gameStates dictionary
 #This allows the gameStatus class to know which state to call
-gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "runLevel":runLevel, "selectLevel":selectLevel, "sceneOne":sceneOne, "playPrologue":playPrologue, "tutorial":tutorial} 
+gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "runLevel":runLevel, "selectLevel":selectLevel,"levelComplete":levelComplete, "sceneOne":sceneOne, "playPrologue":playPrologue, "tutorial":tutorial} 
 
 while run:
     #Loading time for game
@@ -252,20 +259,28 @@ while run:
         if event.type == pygame.QUIT:
             run = False 
         #Check when the collection game mode has started, then toggle on the counter
-        elif event.type == stage_event and gameStatus.getState() == "runLevel" and currentLevel !=2:
+        elif event.type == stage_event and gameStatus.getState() == "runLevel" and currentLevel != 0:
             stageCounter -= 1
         #When the level ends, several changes will be made:
             # 1. Change to Shop state
             # 2. Add the player's score to the scoresList, and wipe out the current score (managed by the collecitonPile)
             # 3. Reset the counter (currently default to 10 seconds)
         if stageCounter == 0:
-            currentLevel = 2 
+            currentLevel = 1 
             clearTrash()
             stageCounter = baseTime
             gameStatus.setState("shop")
             scoresList.append(collectPile)
             collectPile = 0
             spawnTrashToggle = True
+
+            #Modify the trashSpawnRate base on player performance
+            if scoresList[len(scoresList) - 1] >= levelsList.get(1)[scoreIndex]:
+                trashSpawnRate = 2
+            elif scoresList[len(scoresList) - 1] < levelsList.get(1)[scoreIndex]:
+                trashSpawnRate = 10
+            else:
+                trashSpawnRate = 5
 
     #Get the current gameStatus and check through the gameStates dictionary
     #When there is a match, run the given state
@@ -373,15 +388,30 @@ while run:
         #Get the proper background from level.py by updating the current level
         runLevel.levelNumber = currentLevel
         #Set up background bounds based on the current level
-        if currentLevel == 1:
+        if currentLevel == 0: 
+            #Tutorial
+            w_lowBounds = char.speed
+            h_lowbounds = char.speed
+            spawnTrash(1, char.speed, widthBoundary, char.speed, heightBoundary)
+
+            #When the player collects 2 trash, end the level and reset everything
+            if(levelsList.get(0) <= collectPile):
+                collectPile = 0
+                coinPouch = 0
+                stageCounter = 0
+
+        elif currentLevel == 1: 
+            #Level One
             w_lowBounds = char.speed
             h_lowbounds = win.backgroundList[3][1]
-            spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
+            #After the round ends, check the player's score and change the spawn rate base on that score
+            spawnTrash(trashSpawnRate, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
+
         else: 
             #Default bounds if the level does not have specific bounds
             w_lowBounds = char.speed
             h_lowbounds = char.speed
-            spawnTrash(1, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
+            spawnTrash(5, char.speed, widthBoundary, char.speed, heightBoundary)
 
         #Get the user's input, specifically which keys they pressed
         #Then base on these keys, move the player around the map

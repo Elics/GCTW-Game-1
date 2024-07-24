@@ -170,19 +170,23 @@ class gameEnd():
       
 #Runs the collection game mode. To run, I simply toggle the variable collectionMode
 class runLevel():
-    def __init__(self, gameStatus, levelNumber, playerClass):
+    def __init__(self, gameStatus, playerClass):
         self.gameStatus = gameStatus 
-        self.levelNumber = levelNumber
+        self.levelNumber = None
         self.playerClass = playerClass
         self.setPlayerPosition = True
 
     def run(self):
+        #NOTE: Use a python equivalent of a switch-case or dictionary?
         if self.levelNumber == 1:
             tempWin.currentWindow.blit(tempWin.backgroundList[3][0], (0,0))
             if self.setPlayerPosition == True:
                 self.playerClass.x = 600
                 self.playerClass.y = 400
                 self.setPlayerPosition = False
+        elif self.levelNumber == 2:
+            tempWin.currentWindow.fill("white")
+
 
 
 # ~~Cutscenes~~
@@ -457,6 +461,7 @@ class tutorial(sceneOne):
             self.setPlayerPosition = False
         tempWin.currentWindow.blit(tempWin.backgroundList[3][0], (0,0))
         self.movementScene()
+        
 
 
 

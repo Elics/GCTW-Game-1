@@ -91,8 +91,8 @@ menu_font = pygame.font.SysFont('Verdana', 80, False)
 #~~ Shop Features ~~
 #Index to loop through available upgrades
 upgradeIndex = 0
-#A list to store all coin values collected
-coinsList = 0
+#Tracks the player's coins
+coinPouch = 0
 #A List of all Upgrades
  #Upgrades
     # char.speed += 10
@@ -100,8 +100,9 @@ coinsList = 0
 upgradeList = [char.speed, baseTime]
 
 #~~ Level Features ~~
+#A list and indicator of the levels
 levelsList = [1]
-currentLevel = 1
+currentLevel = 2
 #Stores all the surfaces/trash sprites
 trashPile = []
 #Contains the rectangles of all the generated trash
@@ -115,6 +116,7 @@ spawnTrashToggle = True
 
 #~~~ Functions ~~~ 
 #Create and add trash objects to trashPile. Additionally add their hitboxes to trashHitboxes
+#After trash is spawn, it will stop spawning new boxes until the level timer reaches 0
 def spawnTrash(amount, widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary):
     global spawnTrashToggle
     #Check if the trash can spawn
@@ -151,15 +153,15 @@ def collectTrash(player_hitbox, widthLowerBoundary, widthUpperBoundary, heightLo
         #NOTE: To track score, I currently have a list. 
         #Everytime a trash been collected, it will be tallied in this list
         #I need to find a way to replace this method, wastes resources
-        global coinsList
+        global coinPouch
         global collectPile
         if trashPile[collectTrash].treasure == 1:
         #If trash has treasure attribute: 10+ Coins, 5+ Points
-            coinsList = coinsList + 10
+            coinPouch = coinPouch + 10
             collectPile = collectPile + 5
         else:
         #Normal Trash: 2+ Coints, 1+ Points
-            coinsList = coinsList + 2
+            coinPouch = coinPouch + 2
             collectPile = collectPile + 1
 
 
@@ -189,7 +191,7 @@ def redrawGameWindow(widthLowerBoundary, widthUpperBoundary, heightLowerBoundary
     win.addUI(stageCounter_txt, (0,0))
 
     #Display coins
-    coin_txt = score_font.render("Coins: " + str(coinsList), True, "black")
+    coin_txt = score_font.render("Coins: " + str(coinPouch), True, "black")
     win.addUI(coin_txt, (400, 0))
 
     #Load the player/Update player's movement
@@ -227,7 +229,7 @@ start = level.startGame(gameStatus)
 menu = level.menuScreen(gameStatus, [menu_font])
 end = level.gameEnd(gameStatus)
 shop = level.upgradeShop(gameStatus, char.speed, baseTime, 0, [score_font])
-runLevel = level.runLevel(gameStatus, currentLevel, char)
+runLevel = level.runLevel(gameStatus, char)
 selectLevel = level.selectLevel(gameStatus, [subtitle_font])
 
 #All Cutscenes
@@ -250,13 +252,14 @@ while run:
         if event.type == pygame.QUIT:
             run = False 
         #Check when the collection game mode has started, then toggle on the counter
-        elif event.type == stage_event and gameStatus.getState() == "runLevel":
+        elif event.type == stage_event and gameStatus.getState() == "runLevel" and currentLevel !=2:
             stageCounter -= 1
         #When the level ends, several changes will be made:
             # 1. Change to Shop state
             # 2. Add the player's score to the scoresList, and wipe out the current score (managed by the collecitonPile)
             # 3. Reset the counter (currently default to 10 seconds)
         if stageCounter == 0:
+            currentLevel = 2 
             clearTrash()
             stageCounter = baseTime
             gameStatus.setState("shop")
@@ -268,9 +271,9 @@ while run:
     #When there is a match, run the given state
     gameStates[gameStatus.getState()].run()
     
-
     #Menu Screen Toggle
     if pygame.key.get_pressed()[pygame.K_m]:
+        pygame.time.delay(200)
         #When opening the menu, track the previous state and then change to menu state
         if gameStatus.getState() != "menu":
             gameStatus.setPreviousState()
@@ -283,6 +286,7 @@ while run:
             #Clear the current set of trash
             clearTrash()
             #Respawn trash base on the window size
+            spawnTrashToggle = True
             spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
 
             #Return to the previous state
@@ -297,7 +301,7 @@ while run:
     #Get the index to the upgrade from the upgradeList
     if gameStatus.getState() == "shop":
         #Update the coin display
-        shop.coins = coinsList
+        shop.coins = coinPouch
 
         #Check which selection the player has made
         if pygame.key.get_pressed()[pygame.K_d] and upgradeIndex < 2:
@@ -323,12 +327,12 @@ while run:
                 gameStatus.setState("runLevel")
 
             #Player buys an upgrade and checks if they have enough coins to do so
-            elif upgradeList[upgradeIndex] < 60 and coinsList > 0:
+            elif upgradeList[upgradeIndex] < 60 and coinPouch > 0:
                 #Collect the coins
-                if int(upgradeList[upgradeIndex] / 10)*10 <= coinsList:
-                    coinsList = coinsList - 10*int(upgradeList[upgradeIndex] / 10)
-                    #Update coinsList/display
-                    shop.coins = coinsList
+                if int(upgradeList[upgradeIndex] / 10)*10 <= coinPouch:
+                    coinPouch = coinPouch - 10*int(upgradeList[upgradeIndex] / 10)
+                    #Update coinPouch/display
+                    shop.coins = coinPouch
                     #Increase corresponding upgrade by 10 on the upgradeList
                     upgradeList[upgradeIndex] = upgradeList[upgradeIndex] + 10
                     #Update the corresponding variables base on the values in the upgradeList
@@ -366,14 +370,19 @@ while run:
         
     #~~ Collection Mode: Collect Trash ~~
     if gameStatus.getState() == "runLevel":
-        #Set up bounds base on level/background
+        #Get the proper background from level.py by updating the current level
+        runLevel.levelNumber = currentLevel
+        #Set up background bounds based on the current level
         if currentLevel == 1:
             w_lowBounds = char.speed
             h_lowbounds = win.backgroundList[3][1]
             spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
-        else:
+        else: 
+            #Default bounds if the level does not have specific bounds
             w_lowBounds = char.speed
             h_lowbounds = char.speed
+            spawnTrash(1, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
+
         #Get the user's input, specifically which keys they pressed
         #Then base on these keys, move the player around the map
         keys = pygame.key.get_pressed()
@@ -395,7 +404,7 @@ while run:
         redrawGameWindow(w_lowBounds, widthBoundary, h_lowbounds, heightBoundary)
 
         #Update Shop Coin Display
-        shop.coins = coinsList
+        shop.coins = coinPouch
 
 #When the game is off, close the pygame program as well.
 pygame.quit()

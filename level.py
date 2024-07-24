@@ -2,7 +2,6 @@
 #Each level or cutscene, which will be called states, is defined in its own class
 import pygame
 import window
-import sprite
 
 #NOTE: Add a way to track already played scenes/levels
 
@@ -35,11 +34,10 @@ class gameStatus():
 #The starting screen
 class startGame():
     def __init__(self, gameStatus):
-        self.display = tempWin.currentWindow
         self.gameStatus = gameStatus
 
     def run(self):
-        self.display.blit(tempWin.backgroundList[1][0], (0,0))
+        tempWin.currentWindow.blit(tempWin.backgroundList[1][0], (0,0))
 
         pygame.display.flip()
 
@@ -51,17 +49,16 @@ class startGame():
 #Level Selection Screen: Replay any cutscene or level
 class selectLevel():
     def __init__(self, gameStatus, fontSet):
-        self.display = tempWin.currentWindow
         self.gameStatus = gameStatus
         self.fontSet = fontSet
         self.levelIndex = 0
 
     def run(self):
-        self.display.blit(tempWin.backgroundList[7][0], (0,0))
+        tempWin.currentWindow.blit(tempWin.backgroundList[7][0], (0,0))
         prologue_rect = pygame.Rect(200,300, 200,100)
         sceneOne_rect = pygame.Rect(500,300, 200,100)
-        pygame.draw.rect(self.display, "red", prologue_rect)
-        pygame.draw.rect(self.display, "red", sceneOne_rect)
+        pygame.draw.rect(tempWin.currentWindow, "red", prologue_rect)
+        pygame.draw.rect(tempWin.currentWindow, "red", sceneOne_rect)
         prologue_txt = self.fontSet[0].render("Prologue", True, "white")
         levelOne_txt = self.fontSet[0].render("Level One", True, "white")
 
@@ -73,9 +70,9 @@ class selectLevel():
             self.gameStatus.setState(newScenes[self.levelIndex])
 
         if self.levelIndex == 0:
-            pygame.draw.rect(self.display, "pink", prologue_rect)
+            pygame.draw.rect(tempWin.currentWindow, "pink", prologue_rect)
         elif self.levelIndex == 1:
-            pygame.draw.rect(self.display, "pink", sceneOne_rect)
+            pygame.draw.rect(tempWin.currentWindow, "pink", sceneOne_rect)
 
         tempWin.addUI(prologue_txt, (225,325))
         tempWin.addUI(levelOne_txt, (525,325))
@@ -86,7 +83,6 @@ class selectLevel():
 #Menu Screen
 class menuScreen():
     def __init__(self, gameStatus , fontSet):
-        self.display = tempWin.currentWindow
         self.gameStatus = gameStatus
         self.fontSet = fontSet
         self.select = None
@@ -94,7 +90,7 @@ class menuScreen():
         self.height = tempWin.winHeight
 
     def run(self):
-        self.display.blit(tempWin.backgroundList[0][0], (0,0))
+        tempWin.currentWindow.blit(tempWin.backgroundList[0][0], (0,0))
 
         currentSize = tempWin.windowSizes[tempWin.screenSizeIndex]
 
@@ -126,7 +122,6 @@ class menuScreen():
 #Displays Upgrade Shop after every level
 class upgradeShop():
     def __init__(self, gameStatus, speed, time, coins, fontSet):
-        self.display = tempWin.currentWindow
         self.gameStatus = gameStatus
         self.speedBuff = speed
         self.timeBuff = time
@@ -144,13 +139,13 @@ class upgradeShop():
         #Each upgrade button corresponds to an integer
         #Only display the price if an upgrade is selected
         if (self.selected == 0):
-            self.display.blit(tempWin.backgroundList[4][0], (0,0))
+            tempWin.currentWindow.blit(tempWin.backgroundList[4][0], (0,0))
             tempWin.addUI(price_txt, (50, 50))
         elif (self.selected == 1):
-            self.display.blit(tempWin.backgroundList[5][0], (0,0))
+            tempWin.currentWindow.blit(tempWin.backgroundList[5][0], (0,0))
             tempWin.addUI(price_txt, (50, 50))
         elif (self.selected == 2):
-            self.display.blit(tempWin.backgroundList[6][0], (0,0))
+            tempWin.currentWindow.blit(tempWin.backgroundList[6][0], (0,0))
 
         #Display Coins
         #Coins Display Text
@@ -162,11 +157,11 @@ class upgradeShop():
 #The ending scene
 class gameEnd():
     def __init__(self, gameStatus):
-        self.display = tempWin.currentWindow
+        tempWin.currentWindow = tempWin.currentWindow
         self.gameStatus = gameStatus 
 
     def run(self):
-        self.display.blit(tempWin.backgroundList[2][0], (0,0))
+        tempWin.currentWindow.blit(tempWin.backgroundList[2][0], (0,0))
 
         pygame.display.flip()
 
@@ -193,7 +188,7 @@ class runLevel():
 # ~~Cutscenes~~
 class dialogueBox():
     def __init__(self, color, animationSet, fontSet):
-        self.display = tempWin.currentWindow
+        tempWin.currentWindow = tempWin.currentWindow
         self.color = color
         self.animationSet = animationSet
         self.fontSet = fontSet
@@ -204,7 +199,7 @@ class dialogueBox():
         #Run the dialogue 
         if len(textSet) > nextLine:
             self.dialogueBox = pygame.Rect(0, 420, tempWin.winWidth, tempWin.winHeight)
-            pygame.draw.rect(self.display, self.color, self.dialogueBox)
+            pygame.draw.rect(tempWin.currentWindow, self.color, self.dialogueBox)
             tempWin.addUI(self.animationSet[0][0], (-80, 350))
 
             instructions_txt = self.fontSet[1].render("Press SPACE to continue", True, "white")
@@ -220,7 +215,7 @@ class dialogueBox():
 #for the first time.
 class sceneOne():
     def __init__(self, gameStatus, fontSet, animationSet, profileSet, playerClass, playerSheet, scale, windowDimensions):
-        self.display = tempWin.currentWindow
+        tempWin.currentWindow = tempWin.currentWindow
         self.gameStatus = gameStatus 
         self.fontSet = fontSet
         self.animationSet = animationSet
@@ -258,7 +253,7 @@ class sceneOne():
         self.currentFrame = self.playerSheet.frameTiming(currentTime, self.previousTime, 200, self.currentFrame, currentSet)[0]
         self.previousTime = self.playerSheet.frameTiming(currentTime, self.previousTime, 200, self.currentFrame, currentSet)[1]
         self.playerClass.playerHitbox(self.scale)
-        self.display.blit(self.animationSet[currentSet][self.currentFrame], (self.playerClass.x, self.playerClass.y))
+        tempWin.currentWindow.blit(self.animationSet[currentSet][self.currentFrame], (self.playerClass.x, self.playerClass.y))
 
     #Loops through the given dialogue list with the given dialogue box. After the dialogue is finished, set the next scene
     def loopDialogue(self, gameState, dialogueList, dialogueBox):
@@ -296,10 +291,10 @@ class sceneOne():
             self.setPlayerPosition = False
 
         #Display background
-        self.display.blit(tempWin.backgroundList[3][0], (0 ,0))
+        tempWin.currentWindow.blit(tempWin.backgroundList[3][0], (0 ,0))
         #Spawn a trigger block to signal the next dialoguePart
         NPC = pygame.Rect(600, 500, 100, 50)
-        pygame.draw.rect(self.display, "red", NPC)
+        pygame.draw.rect(tempWin.currentWindow, "red", NPC)
 
         #Set up Dialogue
         testBox = dialogueBox("black", self.profileSet, self.fontSet)
@@ -327,6 +322,7 @@ class sceneOne():
             self.nextSceneToggle = True
 
         self.movementScene()
+        #NOTE: Switch to tutorial when it is complete
         self.loopDialogue("runLevel", dialogueList, testBox)
 
         pygame.display.flip()
@@ -336,7 +332,7 @@ class sceneOne():
 #Inherits the sceneOne class methods
 class prologue(sceneOne):
     def __init__(self, gameStatus, fontSet, animationSet, profileSet, playerClass, playerSheet, scale, windowDimensions):
-        self.display = tempWin.currentWindow
+        tempWin.currentWindow = tempWin.currentWindow
         self.gameStatus = gameStatus 
         self.fontSet = fontSet
         self.animationSet = animationSet
@@ -369,12 +365,12 @@ class prologue(sceneOne):
             self.setPlayerPosition = False
 
         #Set up background
-        self.display.fill("black")
+        tempWin.currentWindow.fill("black")
 
         #Create the UFO to board
         UFO = pygame.Rect(740, 150, 200, 100)
         #Draw the UFO. When the player is on it, the next scene will play
-        pygame.draw.rect(self.display, "grey", UFO)
+        pygame.draw.rect(tempWin.currentWindow, "grey", UFO)
 
         #Set up dialogue
         prologueBox = dialogueBox("black", self.profileSet, self.fontSet)
@@ -427,5 +423,41 @@ class prologue(sceneOne):
 
         pygame.display.flip()
 
+class tutorial(sceneOne):
+    def __init__(self, gameStatus, fontSet, animationSet, profileSet, playerClass, playerSheet, scale, windowDimensions):
+        self.gameStatus = gameStatus 
+        self.fontSet = fontSet
+        self.animationSet = animationSet
+        self.profileSet = profileSet
+        self.playerClass = playerClass
+        self.playerSheet = playerSheet
+        self.scale = scale
+        self.width = windowDimensions[0]
+        self.height = windowDimensions[1]
 
+        #Tracks scene progression/dialogue
+        self.sceneMove = True
+        self.dialoguePart = 0
+        self.nextLine = 0
+
+        #Animations for the scene
+        self.currentFrame = 0
+        self.previousTime = pygame.time.get_ticks()
+
+        #A temporary variable to help set the player's position in the scene
+        self.setPlayerPosition = True
+        self.nextSceneToggle = None
         
+
+    #NOTE: For an easy tutorial, simply show a cutscene of instructions rather than live for now
+    def run(self):
+        if self.setPlayerPosition == True:
+            self.playerClass.x = 600
+            self.playerClass.y = 400
+            self.setPlayerPosition = False
+        tempWin.currentWindow.blit(tempWin.backgroundList[3][0], (0,0))
+        self.movementScene()
+
+
+
+        pygame.display.flip()

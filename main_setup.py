@@ -92,7 +92,7 @@ menu_font = pygame.font.SysFont('Verdana', 80, False)
 #Index to loop through available upgrades
 upgradeIndex = 0
 #A list to store all coin values collected
-coinsList = [0]
+coinsList = 0
 #A List of all Upgrades
  #Upgrades
     # char.speed += 10
@@ -100,28 +100,35 @@ coinsList = [0]
 upgradeList = [char.speed, baseTime]
 
 #~~ Level Features ~~
-levelsList = [1,2,3]
-currentLevel = 0
+levelsList = [1]
+currentLevel = 1
 #Stores all the surfaces/trash sprites
 trashPile = []
 #Contains the rectangles of all the generated trash
 trashHitboxes = []
 #Holds all collected trash
-collectPile = [0]
+collectPile = 0
 #Tracks score on each level
 scoresList = []
+#Allow trash to spawn on the map
+spawnTrashToggle = True
 
 #~~~ Functions ~~~ 
 #Create and add trash objects to trashPile. Additionally add their hitboxes to trashHitboxes
 def spawnTrash(amount, widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary):
-    #Initialize Trash objects and add to trashPile list
-    for i in range(amount):
-        trashPile.append(trash.Trash(char.hitbox[2], char.hitbox[3], widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary))
+    global spawnTrashToggle
+    #Check if the trash can spawn
+    if spawnTrashToggle == True:
+        #Initialize Trash objects and add to trashPile list
+        for i in range(amount):
+            trashPile.append(trash.Trash(char.hitbox[2], char.hitbox[3], widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary))
 
-    #Add Trash hitboxes to the trashHitboxes list. This is essential for player/trash collision
-    #A separate list is needed as the collidelist() method only takes a list of rectangles.
-    for i in trashPile:
-        trashHitboxes.append(i.hitbox)
+        #Add Trash hitboxes to the trashHitboxes list. This is essential for player/trash collision
+        #A separate list is needed as the collidelist() method only takes a list of rectangles.
+        for i in trashPile:
+            trashHitboxes.append(i.hitbox)
+    #Finishes spawning a set number of boxes
+    spawnTrashToggle = False
 
 def clearTrash():
     for i in range(len(trashPile)):
@@ -144,14 +151,16 @@ def collectTrash(player_hitbox, widthLowerBoundary, widthUpperBoundary, heightLo
         #NOTE: To track score, I currently have a list. 
         #Everytime a trash been collected, it will be tallied in this list
         #I need to find a way to replace this method, wastes resources
+        global coinsList
+        global collectPile
         if trashPile[collectTrash].treasure == 1:
         #If trash has treasure attribute: 10+ Coins, 5+ Points
-            coinsList[0] = coinsList[0] + 10
-            collectPile[0] = collectPile[0] + 5
+            coinsList = coinsList + 10
+            collectPile = collectPile + 5
         else:
         #Normal Trash: 2+ Coints, 1+ Points
-            coinsList[0] = coinsList[0] + 2
-            collectPile[0] = collectPile[0] + 1
+            coinsList = coinsList + 2
+            collectPile = collectPile + 1
 
 
         #Replace the current trash object with the new one
@@ -172,7 +181,7 @@ def redrawGameWindow(widthLowerBoundary, widthUpperBoundary, heightLowerBoundary
             win.currentWindow.blit(trash.image, (trash.x, trash.y))
 
     #Display score
-    score_txt = score_font.render("Collected: " + str(collectPile[0]), True, "black")
+    score_txt = score_font.render("Collected: " + str(collectPile), True, "black")
     win.addUI(score_txt, (750, 0))
 
     #Display timer
@@ -180,7 +189,7 @@ def redrawGameWindow(widthLowerBoundary, widthUpperBoundary, heightLowerBoundary
     win.addUI(stageCounter_txt, (0,0))
 
     #Display coins
-    coin_txt = score_font.render("Coins: " + str(coinsList[0]), True, "black")
+    coin_txt = score_font.render("Coins: " + str(coinsList), True, "black")
     win.addUI(coin_txt, (400, 0))
 
     #Load the player/Update player's movement
@@ -203,14 +212,14 @@ def redrawGameWindow(widthLowerBoundary, widthUpperBoundary, heightLowerBoundary
 #Toggles the Running status of the game (on/off)
 run = True
 
-#Spawn the initial set of trash in the map
-#Spawn Location Dimensions (estimated): X:15-950; Y:200-550
-spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
+# #Spawn the initial set of trash in the map
+# #Spawn Location Dimensions (estimated): X:15-950; Y:200-550
+# spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
  
 #~~ Game Statuses ~~
 #Initialize the game status class and play the starting screen first
 #I place this here to access the windowDetails variable, which is used to display backgrounds in level.py
-gameStatus = level.gameStatus("start")
+gameStatus = level.gameStatus("runLevel")
 
 #Initialize all the states
 #NOTE: Fonts are placed in a list
@@ -218,17 +227,18 @@ start = level.startGame(gameStatus)
 menu = level.menuScreen(gameStatus, [menu_font])
 end = level.gameEnd(gameStatus)
 shop = level.upgradeShop(gameStatus, char.speed, baseTime, 0, [score_font])
-runLevel = level.runLevel(gameStatus, levelsList[currentLevel], char)
+runLevel = level.runLevel(gameStatus, currentLevel, char)
 selectLevel = level.selectLevel(gameStatus, [subtitle_font])
 
 #All Cutscenes
 playPrologue = level.prologue(gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
 sceneOne = level.sceneOne(gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
+tutorial = level.tutorial(gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
 
 
 #Add the states to the gameStates dictionary
 #This allows the gameStatus class to know which state to call
-gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "runLevel":runLevel, "selectLevel":selectLevel, "sceneOne":sceneOne, "playPrologue":playPrologue} 
+gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "runLevel":runLevel, "selectLevel":selectLevel, "sceneOne":sceneOne, "playPrologue":playPrologue, "tutorial":tutorial} 
 
 while run:
     #Loading time for game
@@ -247,10 +257,12 @@ while run:
             # 2. Add the player's score to the scoresList, and wipe out the current score (managed by the collecitonPile)
             # 3. Reset the counter (currently default to 10 seconds)
         if stageCounter == 0:
+            clearTrash()
             stageCounter = baseTime
             gameStatus.setState("shop")
-            scoresList.append(collectPile[0])
-            collectPile[0] = 0
+            scoresList.append(collectPile)
+            collectPile = 0
+            spawnTrashToggle = True
 
     #Get the current gameStatus and check through the gameStates dictionary
     #When there is a match, run the given state
@@ -285,7 +297,7 @@ while run:
     #Get the index to the upgrade from the upgradeList
     if gameStatus.getState() == "shop":
         #Update the coin display
-        shop.coins = coinsList[0]
+        shop.coins = coinsList
 
         #Check which selection the player has made
         if pygame.key.get_pressed()[pygame.K_d] and upgradeIndex < 2:
@@ -311,12 +323,12 @@ while run:
                 gameStatus.setState("runLevel")
 
             #Player buys an upgrade and checks if they have enough coins to do so
-            elif upgradeList[upgradeIndex] < 60 and coinsList[0] > 0:
+            elif upgradeList[upgradeIndex] < 60 and coinsList > 0:
                 #Collect the coins
-                if int(upgradeList[upgradeIndex] / 10)*10 <= coinsList[0]:
-                    coinsList[0] = coinsList[0] - 10*int(upgradeList[upgradeIndex] / 10)
+                if int(upgradeList[upgradeIndex] / 10)*10 <= coinsList:
+                    coinsList = coinsList - 10*int(upgradeList[upgradeIndex] / 10)
                     #Update coinsList/display
-                    shop.coins = coinsList[0]
+                    shop.coins = coinsList
                     #Increase corresponding upgrade by 10 on the upgradeList
                     upgradeList[upgradeIndex] = upgradeList[upgradeIndex] + 10
                     #Update the corresponding variables base on the values in the upgradeList
@@ -355,9 +367,10 @@ while run:
     #~~ Collection Mode: Collect Trash ~~
     if gameStatus.getState() == "runLevel":
         #Set up bounds base on level/background
-        if currentLevel == 0:
+        if currentLevel == 1:
             w_lowBounds = char.speed
             h_lowbounds = win.backgroundList[3][1]
+            spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
         else:
             w_lowBounds = char.speed
             h_lowbounds = char.speed
@@ -382,7 +395,7 @@ while run:
         redrawGameWindow(w_lowBounds, widthBoundary, h_lowbounds, heightBoundary)
 
         #Update Shop Coin Display
-        shop.coins = coinsList[0]
+        shop.coins = coinsList
 
 #When the game is off, close the pygame program as well.
 pygame.quit()

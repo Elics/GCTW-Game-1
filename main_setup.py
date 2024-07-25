@@ -102,11 +102,11 @@ upgradeList = [char.speed, baseTime]
 #~~ Level Features ~~
 #A list of levels and the minimum collection goal
 levelsList = {
-    0:2,
+    0:5,
     1:[5]
     }
 #Indicate the current level
-currentLevel = 1
+currentLevel = 0
 #Stores all the surfaces/trash sprites
 trashPile = []
 #Contains the rectangles of all the generated trash
@@ -227,7 +227,7 @@ run = True
 #~~ Game Statuses ~~
 #Initialize the game status class and play the starting screen first
 #I place this here to access the windowDetails variable, which is used to display backgrounds in level.py
-gameStatus = level.gameStatus("runLevel")
+gameStatus = level.gameStatus("start")
 
 #Initialize all the states
 #NOTE: Fonts are placed in a list
@@ -275,10 +275,10 @@ while run:
             spawnTrashToggle = True
 
             #Modify the trashSpawnRate base on player performance
-            if scoresList[len(scoresList) - 1] >= levelsList.get(1)[scoreIndex]:
-                trashSpawnRate = 2
-            elif scoresList[len(scoresList) - 1] < levelsList.get(1)[scoreIndex]:
-                trashSpawnRate = 10
+            if scoresList[len(scoresList) - 1] >= levelsList.get(currentLevel)[scoreIndex]:
+                trashSpawnRate = 3
+            elif scoresList[len(scoresList) - 1] < levelsList.get(currentLevel)[scoreIndex]:
+                trashSpawnRate = 8
             else:
                 trashSpawnRate = 5
 
@@ -392,10 +392,10 @@ while run:
             #Tutorial
             w_lowBounds = char.speed
             h_lowbounds = char.speed
-            spawnTrash(1, char.speed, widthBoundary, char.speed, heightBoundary)
+            spawnTrash(5, 200, 400, 300, 400)
 
-            #When the player collects 2 trash, end the level and reset everything
-            if(levelsList.get(0) <= collectPile):
+            #When the player collects 5 trash or presses Q, end the level and reset everything
+            if levelsList.get(0) <= collectPile or pygame.key.get_pressed()[pygame.K_q]:
                 collectPile = 0
                 coinPouch = 0
                 stageCounter = 0

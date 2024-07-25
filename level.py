@@ -79,7 +79,6 @@ class selectLevel():
         
         pygame.display.flip()
         
-
 #Menu Screen
 class menuScreen():
     def __init__(self, gameStatus , fontSet):
@@ -186,16 +185,32 @@ class runLevel():
                 self.setPlayerPosition = False
         elif self.levelNumber == 0:
             tempWin.currentWindow.fill("white")
+        else:
+            tempWin.currentWindow.fill("purple")
 
 class levelComplete():
-    def __init__(self, gameStatus, playerClass):
+    def __init__(self, gameStatus, playerClass, fontSet):
         self.gameStatus = gameStatus 
         self.levelNumber = None
         self.playerClass = playerClass
+        self.fontSet = fontSet
         self.setPlayerPosition = True
+        self.score = 0
+        self.currentLevel = None
 
     def run(self):
-        tempWin.currentWindow.fill("purple")
+        tempWin.currentWindow.blit(tempWin.backgroundList[8][0], (0,0))
+        score_txt = self.fontSet[0].render(str(self.score), True, "white")
+        tempWin.addUI(score_txt, (800, 100))
+        if pygame.key.get_pressed()[pygame.K_SPACE]:
+            if self.currentLevel != 2:
+                self.gameStatus.setState("runLevel")
+            else:
+                self.gameStatus.setState("end")
+
+
+        pygame.display.flip()
+
 
 
 # ~~Cutscenes~~
@@ -319,7 +334,8 @@ class sceneOne():
                    "Do humans really live in these conditions??",
                    "Hmm, if I want to watch the squakers...",
                    "...then I have to clear the area", 
-                   "Let's clean up a bit. It shouldn't take too long, right?"]
+                   "Let's clean up a bit. It shouldn't take too long, right?",
+                   "Before I clean up, let's run the training program!"]
         dialogueList = [scene1_1, scene1_2] 
         
         #First play scene1_1. After it finish, allow player to move
@@ -378,12 +394,12 @@ class prologue(sceneOne):
             self.setPlayerPosition = False
 
         #Set up background
-        tempWin.currentWindow.fill("black")
+        tempWin.currentWindow.blit(tempWin.backgroundList[9][0], (0,0))
 
         #Create the UFO to board
-        UFO = pygame.Rect(740, 150, 200, 100)
+        UFO = pygame.Rect(560, 220, 250, 80)
         #Draw the UFO. When the player is on it, the next scene will play
-        pygame.draw.rect(tempWin.currentWindow, "grey", UFO)
+        #pygame.draw.rect(tempWin.currentWindow, "grey", UFO)
 
         #Set up dialogue
         prologueBox = dialogueBox("black", self.profileSet, self.fontSet)
@@ -394,7 +410,7 @@ class prologue(sceneOne):
                      "Hi there! I'm Meep, commander of the Shuttle buggy",
                      "Shuttle buggy is the best space ship accross the galaxy!",
                      "I've been an excellence driver...",
-                     "for Intergalatica's Space Taxi Service",
+                     "for the Intergalatic Taxi Service",
                      "So much so that my boss decided to give me...",
                      "a paid vacation! WOOHOOO!!",
                      "I have dreamt of coming to Earth since I was a blob",
@@ -433,45 +449,5 @@ class prologue(sceneOne):
                 
         self.movementScene()
         self.loopDialogue("sceneOne", dialogueList, prologueBox)
-
-        pygame.display.flip()
-
-class tutorial(sceneOne):
-    def __init__(self, gameStatus, fontSet, animationSet, profileSet, playerClass, playerSheet, scale, windowDimensions):
-        self.gameStatus = gameStatus 
-        self.fontSet = fontSet
-        self.animationSet = animationSet
-        self.profileSet = profileSet
-        self.playerClass = playerClass
-        self.playerSheet = playerSheet
-        self.scale = scale
-        self.width = windowDimensions[0]
-        self.height = windowDimensions[1]
-
-        #Tracks scene progression/dialogue
-        self.sceneMove = True
-        self.dialoguePart = 0
-        self.nextLine = 0
-
-        #Animations for the scene
-        self.currentFrame = 0
-        self.previousTime = pygame.time.get_ticks()
-
-        #A temporary variable to help set the player's position in the scene
-        self.setPlayerPosition = True
-        self.nextSceneToggle = None
-        
-
-    #NOTE: For an easy tutorial, simply show a cutscene of instructions rather than live for now
-    def run(self):
-        if self.setPlayerPosition == True:
-            self.playerClass.x = 600
-            self.playerClass.y = 400
-            self.setPlayerPosition = False
-        tempWin.currentWindow.blit(tempWin.backgroundList[3][0], (0,0))
-        self.movementScene()
-        
-
-
 
         pygame.display.flip()

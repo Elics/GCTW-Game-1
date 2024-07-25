@@ -100,10 +100,10 @@ coinPouch = 0
 upgradeList = [char.speed, baseTime]
 
 #~~ Level Features ~~
-#A list of levels and the minimum collection goal
+#A list of levels and their minimum collection goals
 levelsList = {
-    0:5,
-    1:[5]
+    0:[5],
+    1:[10, 30]
     }
 #Indicate the current level
 currentLevel = 0
@@ -113,11 +113,12 @@ trashPile = []
 trashHitboxes = []
 #Holds all collected trash
 collectPile = 0
-#Tracks score on each level
-scoresList = []
+#Tracks scores on each level
+scoresList = [[0],[0, 0]]
 scoreIndex = 0
 #Allow trash to spawn on the map
 spawnTrashToggle = True
+#Set the default trashSpawnRate 
 trashSpawnRate = 5
 
 #~~~ Functions ~~~ 
@@ -227,7 +228,7 @@ run = True
 #~~ Game Statuses ~~
 #Initialize the game status class and play the starting screen first
 #I place this here to access the windowDetails variable, which is used to display backgrounds in level.py
-gameStatus = level.gameStatus("start")
+gameStatus = level.gameStatus("runLevel")
 
 #Initialize all the states
 #NOTE: Fonts are placed in a list
@@ -237,17 +238,15 @@ end = level.gameEnd(gameStatus)
 shop = level.upgradeShop(gameStatus, char.speed, baseTime, 0, [score_font])
 runLevel = level.runLevel(gameStatus, char)
 selectLevel = level.selectLevel(gameStatus, [subtitle_font])
-levelComplete = level.levelComplete(gameStatus, char)
+levelComplete = level.levelComplete(gameStatus, char, [menu_font])
 
 #All Cutscenes
 playPrologue = level.prologue(gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
 sceneOne = level.sceneOne(gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
-tutorial = level.tutorial(gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
-
 
 #Add the states to the gameStates dictionary
 #This allows the gameStatus class to know which state to call
-gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "runLevel":runLevel, "selectLevel":selectLevel,"levelComplete":levelComplete, "sceneOne":sceneOne, "playPrologue":playPrologue, "tutorial":tutorial} 
+gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "runLevel":runLevel, "selectLevel":selectLevel,"levelComplete":levelComplete, "sceneOne":sceneOne, "playPrologue":playPrologue} 
 
 while run:
     #Loading time for game
@@ -264,23 +263,37 @@ while run:
         #When the level ends, several changes will be made:
             # 1. Change to Shop state
             # 2. Add the player's score to the scoresList, and wipe out the current score (managed by the collecitonPile)
-            # 3. Reset the counter (currently default to 10 seconds)
+            # 3. Reset the time counter (currently default to 10 seconds)
+            # 4. Clear all trash on the map
         if stageCounter == 0:
-            currentLevel = 1 
             clearTrash()
             stageCounter = baseTime
             gameStatus.setState("shop")
-            scoresList.append(collectPile)
+            scoresList[currentLevel][scoreIndex] = collectPile
             collectPile = 0
             spawnTrashToggle = True
 
             #Modify the trashSpawnRate base on player performance
-            if scoresList[len(scoresList) - 1] >= levelsList.get(currentLevel)[scoreIndex]:
-                trashSpawnRate = 3
-            elif scoresList[len(scoresList) - 1] < levelsList.get(currentLevel)[scoreIndex]:
-                trashSpawnRate = 8
+            if currentLevel < len(levelsList):
+                if scoresList[currentLevel][len(scoresList[currentLevel]) - 1] < levelsList.get(currentLevel)[scoreIndex]:
+                    trashSpawnRate = 8
+                    scoreIndex += 1
+                else:
+                    trashSpawnRate = 5
+                    scoreIndex += 1
+                
+                #Go to Next Level state and increase the current level indicator by 1
+                #In addition, sum the score of the level and display it
+                if len(levelsList.get(currentLevel)) == scoreIndex:
+                    levelComplete.score = sum(scoresList[currentLevel])
+                    gameStatus.setState("levelComplete")
+                    currentLevel += 1
+                    levelComplete.currentLevel = currentLevel
+                    scoreIndex = 0
             else:
-                trashSpawnRate = 5
+                levelComplete.score = sum(scoresList[currentLevel])
+                gameStatus.setState("levelComplete")
+                
 
     #Get the current gameStatus and check through the gameStates dictionary
     #When there is a match, run the given state
@@ -302,7 +315,7 @@ while run:
             clearTrash()
             #Respawn trash base on the window size
             spawnTrashToggle = True
-            spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
+            spawnTrash(trashSpawnRate, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
 
             #Return to the previous state
             gameStatus.setState(gameStatus.getPreviousState())
@@ -311,6 +324,10 @@ while run:
         if pygame.key.get_pressed()[pygame.K_q]: 
             gameStatus.setState("end")
         
+    #Level Selection
+    if gameStatus.getState() == "selectLevel":
+        scoreIndex = 0
+        currentLevel = selectLevel.levelIndex
         
     #~~ Shop Interface ~~
     #Get the index to the upgrade from the upgradeList
@@ -395,7 +412,7 @@ while run:
             spawnTrash(5, 200, 400, 300, 400)
 
             #When the player collects 5 trash or presses Q, end the level and reset everything
-            if levelsList.get(0) <= collectPile or pygame.key.get_pressed()[pygame.K_q]:
+            if levelsList.get(0)[0] <= collectPile or pygame.key.get_pressed()[pygame.K_q]:
                 collectPile = 0
                 coinPouch = 0
                 stageCounter = 0

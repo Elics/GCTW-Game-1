@@ -13,7 +13,9 @@ class Window():
             ("images\\backgrounds\\Shop1.png", None),
             ("images\\backgrounds\\Shop2.png", None),
             ("images\\backgrounds\\Shop3.png", None),
-            ("images\\backgrounds\\LevelSelect.png", None)
+            ("images\\backgrounds\\LevelSelect.png", None),
+            ("images\\backgrounds\\NextLevel.png", None),
+            ("images\\backgrounds\\Prologue.png", 150)
             ]
         self.backgroundList = []
         self.screenSizeIndex = 1

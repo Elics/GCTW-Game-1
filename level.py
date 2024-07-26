@@ -55,10 +55,12 @@ class selectLevel():
 
     def run(self):
         tempWin.currentWindow.blit(tempWin.backgroundList[7][0], (0,0))
+
         prologue_rect = pygame.Rect(200,300, 200,100)
         sceneOne_rect = pygame.Rect(500,300, 200,100)
         pygame.draw.rect(tempWin.currentWindow, "red", prologue_rect)
         pygame.draw.rect(tempWin.currentWindow, "red", sceneOne_rect)
+
         prologue_txt = self.fontSet[0].render("Prologue", True, "white")
         levelOne_txt = self.fontSet[0].render("Level One", True, "white")
 
@@ -81,12 +83,14 @@ class selectLevel():
         
 #Menu Screen
 class menuScreen():
-    def __init__(self, gameStatus , fontSet):
+    def __init__(self, gameStatus, fontSet):
         self.gameStatus = gameStatus
         self.fontSet = fontSet
         self.select = None
         self.width = tempWin.winWidth
         self.height = tempWin.winHeight
+        #NOTE: For resizing update later
+        self.scale = 12
 
     def run(self):
         tempWin.currentWindow.blit(tempWin.backgroundList[0][0], (0,0))
@@ -200,17 +204,17 @@ class levelComplete():
 
     def run(self):
         tempWin.currentWindow.blit(tempWin.backgroundList[8][0], (0,0))
+
         score_txt = self.fontSet[0].render(str(self.score), True, "white")
         tempWin.addUI(score_txt, (800, 100))
+
         if pygame.key.get_pressed()[pygame.K_SPACE]:
             if self.currentLevel != 2:
                 self.gameStatus.setState("runLevel")
             else:
                 self.gameStatus.setState("end")
 
-
         pygame.display.flip()
-
 
 
 # ~~Cutscenes~~
@@ -226,15 +230,18 @@ class dialogueBox():
     def setDialogue(self, textSet, nextLine):
         #Run the dialogue 
         if len(textSet) > nextLine:
+            #Create the box
             self.dialogueBox = pygame.Rect(0, 420, tempWin.winWidth, tempWin.winHeight)
             pygame.draw.rect(tempWin.currentWindow, self.color, self.dialogueBox)
+            #Display the character image on the left side
             tempWin.addUI(self.animationSet[0][0], (-80, 350))
 
+            #Display a small instruction in the lower right corner
             instructions_txt = self.fontSet[1].render("Press SPACE to continue", True, "white")
             tempWin.addUI(instructions_txt, (800, 550))
 
             #NOTE: Find a way to have multiple sentences rotate/show in a dialogue box
-           
+            #Display the main dialogue
             dialogue_txt = self.fontSet[0].render(textSet[nextLine], True, "white")
             tempWin.addUI(dialogue_txt, (200, 500))
         
@@ -269,14 +276,17 @@ class sceneOne():
         self.nextSceneToggle = False
         
     #Allow the character to move around the map when sceneMove is True
-    def movementScene(self):
+    def movementScene(self, personalizedSet):
         #Allow players to move when True
         if self.sceneMove == True:
             keys = pygame.key.get_pressed()
             self.playerClass.movement(keys, self.playerClass.speed, self.width, 200, self.height)
 
         #Idle Animation
-        currentSet = self.playerClass.currentSet
+        if personalizedSet != None:
+            currentSet = personalizedSet
+        else:
+            currentSet = self.playerClass.currentSet
         currentTime = pygame.time.get_ticks()
         self.currentFrame = self.playerSheet.frameTiming(currentTime, self.previousTime, 200, self.currentFrame, currentSet)[0]
         self.previousTime = self.playerSheet.frameTiming(currentTime, self.previousTime, 200, self.currentFrame, currentSet)[1]
@@ -350,7 +360,7 @@ class sceneOne():
             self.sceneMove = False
             self.nextSceneToggle = True
 
-        self.movementScene()
+        self.movementScene(None)
         #NOTE: Switch to tutorial when it is complete
         self.loopDialogue("runLevel", dialogueList, testBox)
 
@@ -433,6 +443,11 @@ class prologue(sceneOne):
             #Waits for prologue0 to finish, then makes the character appear across the screen
             if self.nextSceneToggle == False and self.playerClass.x < 300:
                 self.playerClass.x += 15
+
+                #Animates player walking right
+                self.movementScene(4)
+                # tempWin.currentWindow.blit(self.animationSet[4][self.currentFrame], (self.playerClass.x, self.playerClass.y))
+
             #When the player finish moving, run prologue1 and prologue2
             elif self.playerClass.x >= 300:
                 self.nextSceneToggle = True
@@ -447,7 +462,7 @@ class prologue(sceneOne):
                 self.sceneMove = False
                 self.nextSceneToggle = True
                 
-        self.movementScene()
+            self.movementScene(None)
         self.loopDialogue("sceneOne", dialogueList, prologueBox)
 
         pygame.display.flip()

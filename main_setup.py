@@ -105,6 +105,9 @@ levelsList = {
     0:[5],
     1:[10, 30]
     }
+#Tracks scores on each level
+scoresList = [[0],[0, 0]]
+roundIndex = 0
 #Indicate the current level
 currentLevel = 0
 #Stores all the surfaces/trash sprites
@@ -113,18 +116,16 @@ trashPile = []
 trashHitboxes = []
 #Holds all collected trash
 collectPile = 0
-#Tracks scores on each level
-scoresList = [[0],[0, 0]]
-scoreIndex = 0
 #Allow trash to spawn on the map
 spawnTrashToggle = True
-#Set the default trashSpawnRate 
+#Initialize and set default trashSpawnRate 
 trashSpawnRate = 5
 
 #~~~ Functions ~~~ 
 #Create and add trash objects to trashPile. Additionally add their hitboxes to trashHitboxes
 #After trash is spawn, it will stop spawning new boxes until the level timer reaches 0
 def spawnTrash(amount, widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary):
+    #Call the global version of spawnTrashToggles variable
     global spawnTrashToggle
     #Check if the trash can spawn
     if spawnTrashToggle == True:
@@ -136,9 +137,11 @@ def spawnTrash(amount, widthLowerBoundary, widthUpperBoundary, heightLowerBounda
         #A separate list is needed as the collidelist() method only takes a list of rectangles.
         for i in trashPile:
             trashHitboxes.append(i.hitbox)
-    #Finishes spawning a set number of boxes
+    #Finishes spawning a set number of boxes and turn of the toggle to prevent infinite spawn in main loop
     spawnTrashToggle = False
 
+#Clears the whole map and delete all current trash objects/hitboxes
+#This is used when the screen is resized or when a new level starts
 def clearTrash():
     for i in range(len(trashPile)):
         trashPile.pop()
@@ -154,12 +157,11 @@ def collectTrash(player_hitbox, widthLowerBoundary, widthUpperBoundary, heightLo
     collectTrash = player_hitbox.collidelist(trashHitboxes)
     if collectTrash != -1:
         #Create a new trash object with proportions based on player's hitbox
-        # playerWidth, playerHeight, playerSpeed, window width, window height
+        #Parameters: playerWidth, playerHeight, playerSpeed, window width, window height
         newTrash = trash.Trash(char.hitbox[2], char.hitbox[3], widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary)
         
-        #NOTE: To track score, I currently have a list. 
-        #Everytime a trash been collected, it will be tallied in this list
-        #I need to find a way to replace this method, wastes resources
+        #Call the global version of the variables coinPouch and collectPile
+        #Update these values based on the trash object collected
         global coinPouch
         global collectPile
         if trashPile[collectTrash].treasure == 1:
@@ -170,7 +172,6 @@ def collectTrash(player_hitbox, widthLowerBoundary, widthUpperBoundary, heightLo
         #Normal Trash: 2+ Coints, 1+ Points
             coinPouch = coinPouch + 2
             collectPile = collectPile + 1
-
 
         #Replace the current trash object with the new one
         trashPile[collectTrash] = newTrash
@@ -183,6 +184,7 @@ def collectTrash(player_hitbox, widthLowerBoundary, widthUpperBoundary, heightLo
 #Returns the number of coins earned by the end of the level
 def redrawGameWindow(widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary):
     #Draw the trash that exists in trashPile
+    #NOTE: UPDATE the treasure trash image next
     for trash in trashPile:
         if trash.treasure == 1:
             pygame.draw.rect(win.currentWindow, "blue", trash.hitbox)
@@ -202,6 +204,7 @@ def redrawGameWindow(widthLowerBoundary, widthUpperBoundary, heightLowerBoundary
     win.addUI(coin_txt, (400, 0))
 
     #Load the player/Update player's movement
+    #NOTE: Find where this scale variable is called from (Locally or globally?)
     char.playerHitbox(scale)
 
     #Player Hitbox testing
@@ -221,17 +224,12 @@ def redrawGameWindow(widthLowerBoundary, widthUpperBoundary, heightLowerBoundary
 #Toggles the Running status of the game (on/off)
 run = True
 
-# #Spawn the initial set of trash in the map
-# #Spawn Location Dimensions (estimated): X:15-950; Y:200-550
-# spawnTrash(5, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
- 
 #~~ Game Statuses ~~
 #Initialize the game status class and play the starting screen first
 #I place this here to access the windowDetails variable, which is used to display backgrounds in level.py
-gameStatus = level.gameStatus("runLevel")
+gameStatus = level.gameStatus("start")
 
 #Initialize all the states
-#NOTE: Fonts are placed in a list
 start = level.startGame(gameStatus)
 menu = level.menuScreen(gameStatus, [menu_font])
 end = level.gameEnd(gameStatus)
@@ -258,38 +256,44 @@ while run:
         if event.type == pygame.QUIT:
             run = False 
         #Check when the collection game mode has started, then toggle on the counter
+        #If the runLevel is the tutorial (currentLevel == 0), then the timer does not run
         elif event.type == stage_event and gameStatus.getState() == "runLevel" and currentLevel != 0:
             stageCounter -= 1
-        #When the level ends, several changes will be made:
-            # 1. Change to Shop state
-            # 2. Add the player's score to the scoresList, and wipe out the current score (managed by the collecitonPile)
-            # 3. Reset the time counter (currently default to 10 seconds)
-            # 4. Clear all trash on the map
+        #When the counter reaches 0, several changes will be made:
+            # 1. Clear the map of any trash objects and reset their spawn locations
+            # 2. Reset the counter
+            # 3. Set the state to "shop"
+            # 4. Add the score in the scoresList
+            # 5. Set the current score (collectPile) back to 0 and allow trash to spawn for the next round
         if stageCounter == 0:
             clearTrash()
             stageCounter = baseTime
             gameStatus.setState("shop")
-            scoresList[currentLevel][scoreIndex] = collectPile
+            scoresList[currentLevel][roundIndex] = collectPile
             collectPile = 0
             spawnTrashToggle = True
 
-            #Modify the trashSpawnRate base on player performance
+            #Based on the levelsList and the corresponding score minimum, the spawn rate will change base on the player's previous round 
+            #If the player did not meet the minimum collection, then the trash spawn rate increases for that round until they reach the min
+            #Else, the rate stays the same. In both cases, the round (tracked by roundIndex) will move up 
             if currentLevel < len(levelsList):
-                if scoresList[currentLevel][len(scoresList[currentLevel]) - 1] < levelsList.get(currentLevel)[scoreIndex]:
+                if scoresList[currentLevel][len(scoresList[currentLevel]) - 1] < levelsList.get(currentLevel)[roundIndex]:
                     trashSpawnRate = 8
-                    scoreIndex += 1
+                    roundIndex += 1
                 else:
                     trashSpawnRate = 5
-                    scoreIndex += 1
+                    roundIndex += 1
                 
-                #Go to Next Level state and increase the current level indicator by 1
+                #Go to Next Level state and increase currentLevel by 1
                 #In addition, sum the score of the level and display it
-                if len(levelsList.get(currentLevel)) == scoreIndex:
+                if len(levelsList.get(currentLevel)) == roundIndex:
                     levelComplete.score = sum(scoresList[currentLevel])
                     gameStatus.setState("levelComplete")
                     currentLevel += 1
                     levelComplete.currentLevel = currentLevel
-                    scoreIndex = 0
+                    roundIndex = 0
+            
+            #When the player has finished all levels, display the score one last time
             else:
                 levelComplete.score = sum(scoresList[currentLevel])
                 gameStatus.setState("levelComplete")
@@ -310,6 +314,8 @@ while run:
             #When closing the Menu, updates the game boundaries according to the screen size
             widthBoundary =  menu.width - char.hitbox[2] - char_s
             heightBoundary = menu.height - char.hitbox[3]- char_s
+            #NOTE: Modify the scale variable so that when the screen sizes changes, the player model should also change
+            scale = menu.scale
 
             #Clear the current set of trash
             clearTrash()
@@ -325,8 +331,9 @@ while run:
             gameStatus.setState("end")
         
     #Level Selection
+    #Reset the current round to 0 and set the currentLevel to the selected level index
     if gameStatus.getState() == "selectLevel":
-        scoreIndex = 0
+        roundIndex = 0
         currentLevel = selectLevel.levelIndex
         
     #~~ Shop Interface ~~
@@ -347,9 +354,10 @@ while run:
         shop.selected = upgradeIndex
         #Updates the price depending which index is 
         if upgradeIndex < 2:
+            #Calculate and display the price base on the selection made
             shop.price = 10*int(upgradeList[upgradeIndex] / 10)
 
-        #After confirming the index with SPACE, check if the current status is below 60
+        #After confirming the index with SPACE, check if the current upgrade level is below 60
         #Then add the upgrade to the selected index
         #Update all stats and reset the timer base on the update made.
         if pygame.key.get_pressed()[pygame.K_SPACE]:
@@ -362,20 +370,20 @@ while run:
             elif upgradeList[upgradeIndex] < 60 and coinPouch > 0:
                 #Collect the coins
                 if int(upgradeList[upgradeIndex] / 10)*10 <= coinPouch:
-                    coinPouch = coinPouch - 10*int(upgradeList[upgradeIndex] / 10)
                     #Update coinPouch/display
+                    coinPouch = coinPouch - 10*int(upgradeList[upgradeIndex] / 10)
                     shop.coins = coinPouch
                     #Increase corresponding upgrade by 10 on the upgradeList
                     upgradeList[upgradeIndex] = upgradeList[upgradeIndex] + 10
                     #Update the corresponding variables base on the values in the upgradeList
                     char.speed = upgradeList[0]
                     baseTime = upgradeList[1] 
-                    #Update the stageCounter and the buff displays
+                    #Update the stageCounter and the upgrade displays
                     stageCounter = baseTime
+                    #NOTE: Check if these two variables are still needed
                     shop.speedBuff = char.speed
                     shop.timeBuff = baseTime  
                     
-
                 #If the player does not have enough coins for the upgrade
                 else:
                     lessCoins_txt = subtitle_font.render("Not enough coins for next upgrade level!", True, "blue")
@@ -404,14 +412,14 @@ while run:
     if gameStatus.getState() == "runLevel":
         #Get the proper background from level.py by updating the current level
         runLevel.levelNumber = currentLevel
-        #Set up background bounds based on the current level
+        #Set up background bounds based on the current level. This allow the character to move in certain sections of the map
         if currentLevel == 0: 
             #Tutorial
             w_lowBounds = char.speed
             h_lowbounds = char.speed
             spawnTrash(5, 200, 400, 300, 400)
 
-            #When the player collects 5 trash or presses Q, end the level and reset everything
+            #When the player collects 5 trash or presses Q, end the tutorial and reset everything
             if levelsList.get(0)[0] <= collectPile or pygame.key.get_pressed()[pygame.K_q]:
                 collectPile = 0
                 coinPouch = 0
@@ -425,7 +433,7 @@ while run:
             spawnTrash(trashSpawnRate, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
 
         else: 
-            #Default bounds if the level does not have specific bounds
+            #Default bounds
             w_lowBounds = char.speed
             h_lowbounds = char.speed
             spawnTrash(5, char.speed, widthBoundary, char.speed, heightBoundary)
@@ -454,6 +462,4 @@ while run:
         shop.coins = coinPouch
 
 #When the game is off, close the pygame program as well.
-pygame.quit()
-
-#NOTE: Next Goal, work on tutorial and first cutscene 
+pygame.quit() 

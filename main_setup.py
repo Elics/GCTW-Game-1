@@ -183,13 +183,9 @@ def collectTrash(player_hitbox, widthLowerBoundary, widthUpperBoundary, heightLo
 #Parameters: Current Level and 4 Boundaries adjustments to define the trash spawn areas 
 #Returns the number of coins earned by the end of the level
 def redrawGameWindow(widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary):
-    #Draw the trash that exists in trashPile
-    #NOTE: UPDATE the treasure trash image next
+    #Display all the trash in trashPile
     for trash in trashPile:
-        if trash.treasure == 1:
-            pygame.draw.rect(win.currentWindow, "blue", trash.hitbox)
-        else:    
-            win.currentWindow.blit(trash.image, (trash.x, trash.y))
+        win.currentWindow.blit(trash.image, (trash.x, trash.y))
 
     #Display score
     score_txt = score_font.render("Collected: " + str(collectPile), True, "black")
@@ -247,7 +243,7 @@ sceneOne = level.sceneOne(gameStatus, [name_font, instruction_font], animations,
 gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "runLevel":runLevel, "selectLevel":selectLevel,"levelComplete":levelComplete, "sceneOne":sceneOne, "playPrologue":playPrologue} 
 
 while run:
-    #Loading time for game
+    # #Loading time for game
     pygame.time.delay(100)
 
     #Checks for any player interaction while running (mouse clicks, keyboard, etc.)
@@ -462,4 +458,5 @@ while run:
         shop.coins = coinPouch
 
 #When the game is off, close the pygame program as well.
+pygame.event.clear()
 pygame.quit() 

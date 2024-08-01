@@ -31,7 +31,6 @@ class Player():
     #Sets the animation to run as well depending on what key is pressed
     def movement(self, keys, widthLowerBounds, widthUpperBounds, heightLowerBounds, heightUpperBounds):
         #Checks the key and moves the character correspondingly
-
         #Left
         if keys[pygame.K_a] and self.hitbox[0] > widthLowerBounds :
             self.x -= self.speed

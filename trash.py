@@ -1,6 +1,5 @@
 import pygame
 import random
-import level
 
 #Defines a trash object. The dimensions are based on the player's dimensions
 #The trash object should be smaller than the player
@@ -11,8 +10,7 @@ levelOneTrash = ["images\\Trash\\07-Styrofoam.png",
                  "images\\Trash\\11-Bottle.png",
                  "images\\Trash\\14-Twigs.png",
                  "images\\Trash\\25-FilterCigarette.png",
-                 "images\\Trash\\Treasure.png",
-                 "images\\Trash\\01-Egg.png"
+                 "images\\Trash\\Treasure.png"
                  ]
 
 #Convert all images in the levelOneTrash list to be used in Pygames
@@ -23,9 +21,9 @@ def loadTrashImages():
 class Trash():
     def __init__(self, playerWidth, playerHeight, widthLowerBound, widthUpperBound, heightLowerBound, heightUpperBound):
         #Chances of the trash being treasure (1/10 or 10%)
-        self.treasure = 1 #random.randint(1, 10)
+        self.treasure = random.randint(1, 10)
 
-        #Randomly select trash image. If treasure, use the Treasure.png
+        #Randomly select trash image. If treasure, use the Treasure.png else any other image
         if self.treasure == 1:
             self.image = levelOneTrash[5]
         else:

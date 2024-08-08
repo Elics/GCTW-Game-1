@@ -25,8 +25,7 @@ scale = 6
 clock = pygame.time.Clock()
 #Choose the time limit for the stage
 #Separate varible created for shop upgrade
-#NOTE: Change this back
-baseTime = 30 
+baseTime = 10
 stageCounter = baseTime
 #Initialize the timer
 stage_event = pygame.USEREVENT +1
@@ -103,10 +102,10 @@ upgradeList = [char.speed, baseTime]
 #A list of levels and their minimum collection goals
 levelsList = {
     0:[5],
-    1:[10, 30]
+    1:[10, 25, 50]
     }
 #Tracks scores on each level
-scoresList = [[0],[0, 0]]
+scoresList = [[0],[0, 0, 0]]
 roundIndex = 0
 #Indicate the current level
 currentLevel = 0
@@ -120,7 +119,7 @@ collectPile = 0
 spawnTrashToggle = True
 #Initialize and set default trashSpawnRate 
 trashSpawnRate = 5
-#Load all the trash sprites
+#Load all the trash sprites images
 trash.loadTrashImages()
 
 #~~~ Functions ~~~ 
@@ -153,8 +152,6 @@ def clearTrash():
 
 #Checks the collision between trash objects and the player
 #When they collide, replace with a new trash object, which will change shape and spawn location
-#BUG: When the treasure trash is collected, the game freezes for a second. This is the result of the PNG itself. 
-#Maybe the sprite is too detailed/too big and taking a lot of resources to load.
 def collectTrash(player_hitbox, widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary):
     #Get the index of the trash object that been hit by the player's hitbox base on the trashHitboxes list.
     #Returns -1 if nothing been hit yet
@@ -169,9 +166,8 @@ def collectTrash(player_hitbox, widthLowerBoundary, widthUpperBoundary, heightLo
         global coinPouch
         global collectPile
         if trashPile[collectTrash].treasure == 1:
-        #If trash has treasure attribute: 10+ Coins, 5+ Points
+        #If trash has treasure attribute: 10+ Coins, 0+ Points (Not really trash)
             coinPouch = coinPouch + 10
-            collectPile = collectPile + 5
         else:
         #Normal Trash: 2+ Coints, 1+ Points
             coinPouch = coinPouch + 2
@@ -189,7 +185,7 @@ def collectTrash(player_hitbox, widthLowerBoundary, widthUpperBoundary, heightLo
 def redrawGameWindow(widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary):
     #Display all the trash in trashPile
     for trash in trashPile:
-        pygame.draw.rect(win.currentWindow, "blue", trash.hitbox)
+        # pygame.draw.rect(win.currentWindow, "blue", trash.hitbox)
         win.currentWindow.blit(trash.image, (trash.x, trash.y))
 
     #Display score
@@ -209,7 +205,7 @@ def redrawGameWindow(widthLowerBoundary, widthUpperBoundary, heightLowerBoundary
     char.playerHitbox(scale)
 
     #Player Hitbox testing
-    pygame.draw.rect(win.currentWindow, "red", char.hitbox)
+    # pygame.draw.rect(win.currentWindow, "red", char.hitbox)
     
 
     #Show frame
@@ -228,7 +224,7 @@ run = True
 #~~ Game Statuses ~~
 #Initialize the game status class and play the starting screen first
 #I place this here to access the windowDetails variable, which is used to display backgrounds in level.py
-gameStatus = level.gameStatus("runLevel")
+gameStatus = level.gameStatus("start")
 
 #Initialize all the states
 start = level.startGame(gameStatus)
@@ -278,26 +274,34 @@ while run:
             #If the player did not meet the minimum collection, then the trash spawn rate increases for that round until they reach the min
             #Else, the rate stays the same. In both cases, the round (tracked by roundIndex) will move up 
             if currentLevel < len(levelsList):
-                if scoresList[currentLevel][len(scoresList[currentLevel]) - 1] < levelsList.get(currentLevel)[roundIndex]:
+                end.failScore = int(sum(levelsList[currentLevel])/3)
+                if scoresList[currentLevel][roundIndex] < levelsList.get(currentLevel)[roundIndex]:
                     trashSpawnRate = 8
                     roundIndex += 1
                 else:
-                    trashSpawnRate = 5
+                    trashSpawnRate = 4
                     roundIndex += 1
                 
                 #Go to Next Level state and increase currentLevel by 1
                 #In addition, sum the score of the level and display it
                 if len(levelsList.get(currentLevel)) == roundIndex:
+                    #Sum the score
                     levelComplete.score = sum(scoresList[currentLevel])
+                    end.score = levelComplete.score
                     gameStatus.setState("levelComplete")
+                    #Go to the next level
                     currentLevel += 1
                     levelComplete.currentLevel = currentLevel
+                    end.currentLevel = currentLevel
+                    #Reset round index
                     roundIndex = 0
             
             #When the player has finished all levels, display the score one last time
             else:
                 levelComplete.score = sum(scoresList[currentLevel])
+                end.score = levelComplete.score
                 gameStatus.setState("levelComplete")
+                
                 
 
     #Get the current gameStatus and check through the gameStates dictionary

@@ -157,14 +157,22 @@ class upgradeShop():
 
         pygame.display.flip()
         
-#The ending scene
+#The ending scenes
 class gameEnd():
     def __init__(self, gameStatus):
         tempWin.currentWindow = tempWin.currentWindow
         self.gameStatus = gameStatus 
+        self.currentLevel = 0
+        self.failScore = 0
+        self.score = 0
 
     def run(self):
-        tempWin.currentWindow.blit(tempWin.backgroundList[2][0], (0,0))
+        #Check if the player collect the minimum amount of trash to move on
+        if self.failScore > self.score:
+            tempWin.currentWindow.fill("pink")
+        else:
+        #Display default end screen
+            tempWin.currentWindow.blit(tempWin.backgroundList[2][0], (0,0))
 
         pygame.display.flip()
 
@@ -188,10 +196,12 @@ class runLevel():
                 self.playerClass.y = 400
                 self.setPlayerPosition = False
         elif self.levelNumber == 0:
+            #NOTE: Review the tutorial to include the values of trash/score
             tempWin.currentWindow.blit(tempWin.backgroundList[10][0], (0,0))
         else:
             tempWin.currentWindow.fill("purple")
 
+#When a level is complete, show the total score
 class levelComplete():
     def __init__(self, gameStatus, playerClass, fontSet):
         self.gameStatus = gameStatus 

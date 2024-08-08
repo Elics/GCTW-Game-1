@@ -4,7 +4,6 @@ import player
 import trash
 import sprite
 import level
-import window
 
 #Initialize pygame program
 pygame.init()
@@ -121,6 +120,8 @@ collectPile = 0
 spawnTrashToggle = True
 #Initialize and set default trashSpawnRate 
 trashSpawnRate = 5
+#Load all the trash sprites
+trash.loadTrashImages()
 
 #~~~ Functions ~~~ 
 #Create and add trash objects to trashPile. Additionally add their hitboxes to trashHitboxes
@@ -152,6 +153,8 @@ def clearTrash():
 
 #Checks the collision between trash objects and the player
 #When they collide, replace with a new trash object, which will change shape and spawn location
+#BUG: When the treasure trash is collected, the game freezes for a second. This is the result of the PNG itself. 
+#Maybe the sprite is too detailed/too big and taking a lot of resources to load.
 def collectTrash(player_hitbox, widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary):
     #Get the index of the trash object that been hit by the player's hitbox base on the trashHitboxes list.
     #Returns -1 if nothing been hit yet
@@ -186,6 +189,7 @@ def collectTrash(player_hitbox, widthLowerBoundary, widthUpperBoundary, heightLo
 def redrawGameWindow(widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary):
     #Display all the trash in trashPile
     for trash in trashPile:
+        pygame.draw.rect(win.currentWindow, "blue", trash.hitbox)
         win.currentWindow.blit(trash.image, (trash.x, trash.y))
 
     #Display score
@@ -205,8 +209,8 @@ def redrawGameWindow(widthLowerBoundary, widthUpperBoundary, heightLowerBoundary
     char.playerHitbox(scale)
 
     #Player Hitbox testing
-    # pygame.draw.rect(win.currentWindow, "red", char.hitbox)
-    # win.currentWindow.blit(char_frame, (char.x, char.y))
+    pygame.draw.rect(win.currentWindow, "red", char.hitbox)
+    
 
     #Show frame
     win.currentWindow.blit(animations[currentSet][currentFrame], (char.x, char.y))

@@ -1,5 +1,6 @@
 import pygame
 import random
+import level
 
 #Defines a trash object. The dimensions are based on the player's dimensions
 #The trash object should be smaller than the player
@@ -10,19 +11,25 @@ levelOneTrash = ["images\\Trash\\07-Styrofoam.png",
                  "images\\Trash\\11-Bottle.png",
                  "images\\Trash\\14-Twigs.png",
                  "images\\Trash\\25-FilterCigarette.png",
-                 "images\\Trash\\Treasure.png"
+                 "images\\Trash\\Treasure.png",
+                 "images\\Trash\\01-Egg.png"
                  ]
+
+#Convert all images in the levelOneTrash list to be used in Pygames
+def loadTrashImages():
+    for i in range(len(levelOneTrash)):
+        levelOneTrash[i] = pygame.image.load(levelOneTrash[i]).convert_alpha()
 
 class Trash():
     def __init__(self, playerWidth, playerHeight, widthLowerBound, widthUpperBound, heightLowerBound, heightUpperBound):
         #Chances of the trash being treasure (1/10 or 10%)
-        self.treasure = random.randint(1, 10)
+        self.treasure = 1 #random.randint(1, 10)
 
         #Randomly select trash image. If treasure, use the Treasure.png
         if self.treasure == 1:
-            self.image = pygame.image.load(levelOneTrash[5])
+            self.image = levelOneTrash[5]
         else:
-            self.image = pygame.image.load(levelOneTrash[random.randint(0, len(levelOneTrash) - 2)])
+            self.image = levelOneTrash[random.randint(0, len(levelOneTrash) - 2)]
 
         #Scale the trash base on the player's width and height
         self.width = int(playerWidth * 1.5)
@@ -35,4 +42,6 @@ class Trash():
         self.y = random.randint(heightLowerBound, heightUpperBound)
 
         #Initialize trash sprite hitbox
-        self.hitbox = pygame.Rect(self.x, self.y, self.width, self.height)
+        #NOTE: Find a way to scale the hitboxes properly
+        self.hitbox = pygame.Rect(self.x + 20, self.y, int(self.width * 0.5), int(self.height))
+

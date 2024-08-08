@@ -25,7 +25,7 @@ scale = 6
 clock = pygame.time.Clock()
 #Choose the time limit for the stage
 #Separate varible created for shop upgrade
-baseTime = 10
+baseTime = 1
 stageCounter = baseTime
 #Initialize the timer
 stage_event = pygame.USEREVENT +1

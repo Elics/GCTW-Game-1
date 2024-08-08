@@ -169,7 +169,7 @@ class gameEnd():
     def run(self):
         #Check if the player collect the minimum amount of trash to move on
         if self.failScore > self.score:
-            tempWin.currentWindow.fill("pink")
+            tempWin.currentWindow.blit(tempWin.backgroundList[11][0], (0,0))
         else:
         #Display default end screen
             tempWin.currentWindow.blit(tempWin.backgroundList[2][0], (0,0))

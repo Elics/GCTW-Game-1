@@ -8,6 +8,7 @@ class Window():
         self.filesList = [
             #Background.PNG, widthLower, widthUpper, heightLower, heightUpper
             #Those with None will use the default boundaries (Whole window access)
+            #12 Total
             ("images\\backgrounds\\Menu.png", None, None, None, None),
             ("images\\backgrounds\\Start.png", None, None, None, None),
             ("images\\backgrounds\\Quit.png", None, None, None, None),
@@ -18,7 +19,8 @@ class Window():
             ("images\\backgrounds\\LevelSelect.png", None, None, None, None),
             ("images\\backgrounds\\NextLevel.png", None, None, None, None),
             ("images\\backgrounds\\Prologue.png", None, 700, 250, None),
-            ("images\\backgrounds\\Tutorial.png", 200, 400, 300, 400)
+            ("images\\backgrounds\\Tutorial.png", 200, 400, 300, 400),
+            ("images\\backgrounds\\LevelOneFail.png", None, None, None, None)
             ]
         self.backgroundList = []
         self.screenSizeIndex = 1

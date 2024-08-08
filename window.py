@@ -6,16 +6,19 @@ class Window():
         #Window Variables
         self.windowSizes = [(800, 600), (1000, 600), (1200, 700)]
         self.filesList = [
-            ("images\\backgrounds\\Menu.png", None),
-            ("images\\backgrounds\\Start.png", None),
-            ("images\\backgrounds\\Quit.png", None),
-            ("images\\backgrounds\\Beach.png", 200),
-            ("images\\backgrounds\\Shop1.png", None),
-            ("images\\backgrounds\\Shop2.png", None),
-            ("images\\backgrounds\\Shop3.png", None),
-            ("images\\backgrounds\\LevelSelect.png", None),
-            ("images\\backgrounds\\NextLevel.png", None),
-            ("images\\backgrounds\\Prologue.png", 150)
+            #Background.PNG, widthLower, widthUpper, heightLower, heightUpper
+            #Those with None will use the default boundaries (Whole window access)
+            ("images\\backgrounds\\Menu.png", None, None, None, None),
+            ("images\\backgrounds\\Start.png", None, None, None, None),
+            ("images\\backgrounds\\Quit.png", None, None, None, None),
+            ("images\\backgrounds\\Beach.png", None, None, 200, None),
+            ("images\\backgrounds\\Shop1.png", None, None, None, None),
+            ("images\\backgrounds\\Shop2.png", None, None, None, None),
+            ("images\\backgrounds\\Shop3.png", None, None, None, None),
+            ("images\\backgrounds\\LevelSelect.png", None, None, None, None),
+            ("images\\backgrounds\\NextLevel.png", None, None, None, None),
+            ("images\\backgrounds\\Prologue.png", None, 700, 250, None),
+            ("images\\backgrounds\\Tutorial.png", 200, 400, 300, 400)
             ]
         self.backgroundList = []
         self.screenSizeIndex = 1
@@ -49,7 +52,7 @@ class Window():
         for file in self.filesList:
             background = pygame.image.load(file[0])
             background = pygame.transform.smoothscale(background.convert_alpha(), (self.winWidth, self.winHeight))
-            self.backgroundList.append((background, file[1]))
+            self.backgroundList.append((background, file[1], file[2], file[3], file[4]))
 
     #Update the scale of all backgrounds in the backgroundsList
     def updateBackground(self):

@@ -26,7 +26,8 @@ scale = 6
 clock = pygame.time.Clock()
 #Choose the time limit for the stage
 #Separate varible created for shop upgrade
-baseTime = 10
+#NOTE: Change this back
+baseTime = 30 
 stageCounter = baseTime
 #Initialize the timer
 stage_event = pygame.USEREVENT +1
@@ -223,7 +224,7 @@ run = True
 #~~ Game Statuses ~~
 #Initialize the game status class and play the starting screen first
 #I place this here to access the windowDetails variable, which is used to display backgrounds in level.py
-gameStatus = level.gameStatus("start")
+gameStatus = level.gameStatus("runLevel")
 
 #Initialize all the states
 start = level.startGame(gameStatus)
@@ -317,7 +318,7 @@ while run:
             clearTrash()
             #Respawn trash base on the window size
             spawnTrashToggle = True
-            spawnTrash(trashSpawnRate, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
+            spawnTrash(trashSpawnRate, char.speed, widthBoundary, win.backgroundList[3][3], heightBoundary)
 
             #Return to the previous state
             gameStatus.setState(gameStatus.getPreviousState())
@@ -413,7 +414,7 @@ while run:
             #Tutorial
             w_lowBounds = char.speed
             h_lowbounds = char.speed
-            spawnTrash(5, 200, 400, 300, 400)
+            spawnTrash(5, win.backgroundList[10][1], win.backgroundList[10][2], win.backgroundList[10][3], win.backgroundList[10][4])
 
             #When the player collects 5 trash or presses Q, end the tutorial and reset everything
             if levelsList.get(0)[0] <= collectPile or pygame.key.get_pressed()[pygame.K_q]:
@@ -424,9 +425,9 @@ while run:
         elif currentLevel == 1: 
             #Level One
             w_lowBounds = char.speed
-            h_lowbounds = win.backgroundList[3][1]
+            h_lowbounds = win.backgroundList[3][3]
             #After the round ends, check the player's score and change the spawn rate base on that score
-            spawnTrash(trashSpawnRate, char.speed, widthBoundary, win.backgroundList[3][1], heightBoundary)
+            spawnTrash(trashSpawnRate, char.speed, widthBoundary, win.backgroundList[3][3], heightBoundary)
 
         else: 
             #Default bounds

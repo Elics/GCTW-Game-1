@@ -188,7 +188,7 @@ class runLevel():
                 self.playerClass.y = 400
                 self.setPlayerPosition = False
         elif self.levelNumber == 0:
-            tempWin.currentWindow.fill("white")
+            tempWin.currentWindow.blit(tempWin.backgroundList[10][0], (0,0))
         else:
             tempWin.currentWindow.fill("purple")
 
@@ -276,11 +276,11 @@ class sceneOne():
         self.nextSceneToggle = False
         
     #Allow the character to move around the map when sceneMove is True
-    def movementScene(self, personalizedSet):
+    def movementScene(self, personalizedSet, widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary):
         #Allow players to move when True
         if self.sceneMove == True:
             keys = pygame.key.get_pressed()
-            self.playerClass.movement(keys, self.playerClass.speed, self.width, 200, self.height)
+            self.playerClass.movement(keys, widthLowerBoundary, widthUpperBoundary, heightLowerBoundary, heightUpperBoundary)
 
         #Idle Animation
         if personalizedSet != None:
@@ -360,8 +360,8 @@ class sceneOne():
             self.sceneMove = False
             self.nextSceneToggle = True
 
-        self.movementScene(None)
-        #NOTE: Switch to tutorial when it is complete
+        self.movementScene(None, self.playerClass.speed, self.width, tempWin.backgroundList[3][3], self.height)
+        #Switches to tutorial when it is complete
         self.loopDialogue("runLevel", dialogueList, testBox)
 
         pygame.display.flip()
@@ -445,7 +445,7 @@ class prologue(sceneOne):
                 self.playerClass.x += 15
 
                 #Animates player walking right
-                self.movementScene(4)
+                self.movementScene(4, self.playerClass.speed, self.width, self.playerClass.speed, self.height)
                 # tempWin.currentWindow.blit(self.animationSet[4][self.currentFrame], (self.playerClass.x, self.playerClass.y))
 
             #When the player finish moving, run prologue1 and prologue2
@@ -462,7 +462,7 @@ class prologue(sceneOne):
                 self.sceneMove = False
                 self.nextSceneToggle = True
                 
-            self.movementScene(None)
+            self.movementScene(None, self.playerClass.speed, tempWin.backgroundList[9][2], tempWin.backgroundList[9][3], self.height)
         self.loopDialogue("sceneOne", dialogueList, prologueBox)
 
         pygame.display.flip()

@@ -25,7 +25,8 @@ scale = 6
 clock = pygame.time.Clock()
 #Choose the time limit for the stage
 #Separate varible created for shop upgrade
-baseTime = 1
+#NOTE: CHANGE BACK to 10 SECONDS
+baseTime = 2
 stageCounter = baseTime
 #Initialize the timer
 stage_event = pygame.USEREVENT +1
@@ -102,10 +103,12 @@ upgradeList = [char.speed, baseTime]
 #A list of levels and their minimum collection goals
 levelsList = {
     0:[5],
-    1:[10, 25, 50]
+    1:[10, 25, 50],
+    #NOTE: Temporarily added Level 2
+    2: [10]
     }
 #Tracks scores on each level
-scoresList = [[0],[0, 0, 0]]
+scoresList = [[0],[0, 0, 0], [0]]
 roundIndex = 0
 #Indicate the current level
 currentLevel = 0
@@ -233,15 +236,16 @@ end = level.gameEnd(gameStatus)
 shop = level.upgradeShop(gameStatus, char.speed, baseTime, 0, [score_font])
 runLevel = level.runLevel(gameStatus, char)
 selectLevel = level.selectLevel(gameStatus, [subtitle_font])
-levelComplete = level.levelComplete(gameStatus, char, [menu_font])
+levelComplete = level.levelComplete(gameStatus, char, [menu_font], len(levelsList))
 
 #All Cutscenes
 playPrologue = level.prologue(gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
 sceneOne = level.sceneOne(gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
+sceneTwo = level.sceneTwo(gameStatus, [name_font, instruction_font], animations, dialogue_animations, char, char_sheet, scale, (widthBoundary, heightBoundary))
 
 #Add the states to the gameStates dictionary
 #This allows the gameStatus class to know which state to call
-gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "runLevel":runLevel, "selectLevel":selectLevel,"levelComplete":levelComplete, "sceneOne":sceneOne, "playPrologue":playPrologue} 
+gameStates = {"start":start, "menu":menu, "end":end, "shop":shop, "runLevel":runLevel, "selectLevel":selectLevel,"levelComplete":levelComplete, "sceneOne":sceneOne, "playPrologue":playPrologue, "sceneTwo":sceneTwo} 
 
 while run:
     # #Loading time for game
@@ -295,15 +299,14 @@ while run:
                     end.currentLevel = currentLevel
                     #Reset round index
                     roundIndex = 0
-            
-            #When the player has finished all levels, display the score one last time
-            else:
-                levelComplete.score = sum(scoresList[currentLevel])
-                end.score = levelComplete.score
-                gameStatus.setState("levelComplete")
-                
-                
 
+            #When all levels are played, display the end screen
+            #NOTE: Do I really need this if the ending is already implemented and 
+            #checked in levelComplete class? 
+            else:
+                gameStatus.setState("end")
+                
+                
     #Get the current gameStatus and check through the gameStates dictionary
     #When there is a match, run the given state
     gameStates[gameStatus.getState()].run()
@@ -330,10 +333,18 @@ while run:
 
             #Return to the previous state
             gameStatus.setState(gameStatus.getPreviousState())
-    #If Q is pressed, return the End Screen
+    #Menu Screen Key Options
     if gameStatus.getState() == "menu":
+        #If Q is pressed, return the End Screen
         if pygame.key.get_pressed()[pygame.K_q]: 
             gameStatus.setState("end")
+        #Testing Mode Activate
+        if pygame.key.get_pressed()[pygame.K_t]:
+            baseTime = 2
+            char.speed = 40
+            coinPouch = 500
+            collectPile = 100
+
         
     #Level Selection
     #Reset the current round to 0 and set the currentLevel to the selected level index

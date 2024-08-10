@@ -10,7 +10,7 @@ tempWin = window.Window("Our Earth")
 
 # ~~Scene Tracker ~~
 #Tracks all new and played scenes 
-newScenes = ["playPrologue", "runLevel"]
+newScenes = ["playPrologue", "runLevel", "sceneTwo"]
 #When a scene has been played, it will be popped from the newScenes and appended to playedScenes
 playedScenes = []
 
@@ -168,16 +168,31 @@ class gameEnd():
 
     def run(self):
         #Check if the player collect the minimum amount of trash to move on
+        #If the player fails, display the fail screen
         if self.failScore > self.score:
-            tempWin.currentWindow.blit(tempWin.backgroundList[11][0], (0,0))
-        else:
-        #Display default end screen
-            tempWin.currentWindow.blit(tempWin.backgroundList[2][0], (0,0))
+            if self.currentLevel == 2:
+                tempWin.currentWindow.blit(tempWin.backgroundList[11][0], (0,0))
+
+            #NOTE: Change this fail screen to the proper level two story 
+            if self.currentLevel == 3:
+                tempWin.currentWindow.blit(tempWin.backgroundList[2][0], (0,0))
+
+        #If the player successfully completes the level, start the next cutscene
+        elif self.failScore < self.score:
+            if self.currentLevel == 2:
+                self.gameStatus.setState("sceneTwo")
+            
+            #NOTE: Add scene3 here
+            if self.currentLevel == 3:
+                pass
+
+        #When player presses SPACE, go back to main menu
+        if pygame.key.get_pressed()[pygame.K_SPACE]:
+            self.gameStatus.setState("start")
 
         pygame.display.flip()
 
-        if pygame.key.get_pressed()[pygame.K_SPACE]:
-            self.gameStatus.setState("start")
+        
       
 #Runs the collection game mode. To run, I simply toggle the variable collectionMode
 class runLevel():
@@ -196,21 +211,22 @@ class runLevel():
                 self.playerClass.y = 400
                 self.setPlayerPosition = False
         elif self.levelNumber == 0:
-            #NOTE: Review the tutorial to include the values of trash/score
             tempWin.currentWindow.blit(tempWin.backgroundList[10][0], (0,0))
         else:
             tempWin.currentWindow.fill("purple")
 
 #When a level is complete, show the total score
 class levelComplete():
-    def __init__(self, gameStatus, playerClass, fontSet):
+    def __init__(self, gameStatus, playerClass, fontSet, totalLevels):
         self.gameStatus = gameStatus 
         self.levelNumber = None
         self.playerClass = playerClass
         self.fontSet = fontSet
+        self.totalLevels = totalLevels
         self.setPlayerPosition = True
         self.score = 0
         self.currentLevel = None
+        
 
     def run(self):
         tempWin.currentWindow.blit(tempWin.backgroundList[8][0], (0,0))
@@ -219,10 +235,7 @@ class levelComplete():
         tempWin.addUI(score_txt, (800, 100))
 
         if pygame.key.get_pressed()[pygame.K_SPACE]:
-            if self.currentLevel != 2:
-                self.gameStatus.setState("runLevel")
-            else:
-                self.gameStatus.setState("end")
+            self.gameStatus.setState("end")
 
         pygame.display.flip()
 
@@ -474,5 +487,46 @@ class prologue(sceneOne):
                 
             self.movementScene(None, self.playerClass.speed, tempWin.backgroundList[9][2], tempWin.backgroundList[9][3], self.height)
         self.loopDialogue("sceneOne", dialogueList, prologueBox)
+
+        pygame.display.flip()
+
+class sceneTwo(sceneOne):
+    def __init__(self, gameStatus, fontSet, animationSet, profileSet, playerClass, playerSheet, scale, windowDimensions):
+        tempWin.currentWindow = tempWin.currentWindow
+        self.gameStatus = gameStatus 
+        self.fontSet = fontSet
+        self.animationSet = animationSet
+        self.profileSet = profileSet
+        self.playerClass = playerClass
+        self.playerSheet = playerSheet
+        self.scale = scale
+        
+        self.width = windowDimensions[0]
+        self.height = windowDimensions[1]
+
+        #Tracks scene progression/dialogue
+        self.sceneMove = False
+        self.dialoguePart = 0
+        self.nextLine = 0
+
+        #Animations for the scene
+        self.currentFrame = 0
+        self.previousTime = pygame.time.get_ticks()
+
+        #A temporary variable to help set the player's position in the scene
+        self.setPlayerPosition = True
+        self.nextSceneToggle = False
+
+    def run(self):
+        if self.setPlayerPosition == True:
+            self.playerClass.x = 100
+            self.playerClass.y = 100
+            self.setPlayerPosition = False
+        
+        tempWin.currentWindow.fill("white")
+        self.movementScene(0, self.playerClass.speed, self.width, self.playerClass.speed, self.height)
+
+        if pygame.key.get_pressed()[pygame.K_SPACE]:
+            self.gameStatus.setState("runLevel")
 
         pygame.display.flip()

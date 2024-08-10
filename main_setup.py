@@ -26,7 +26,7 @@ clock = pygame.time.Clock()
 #Choose the time limit for the stage
 #Separate varible created for shop upgrade
 #NOTE: CHANGE BACK to 10 SECONDS
-baseTime = 2
+baseTime = 10
 stageCounter = baseTime
 #Initialize the timer
 stage_event = pygame.USEREVENT +1
@@ -232,7 +232,7 @@ gameStatus = level.gameStatus("start")
 #Initialize all the states
 start = level.startGame(gameStatus)
 menu = level.menuScreen(gameStatus, [menu_font])
-end = level.gameEnd(gameStatus)
+end = level.endGame(gameStatus)
 shop = level.upgradeShop(gameStatus, char.speed, baseTime, 0, [score_font])
 runLevel = level.runLevel(gameStatus, char)
 selectLevel = level.selectLevel(gameStatus, [subtitle_font])
@@ -278,7 +278,7 @@ while run:
             #If the player did not meet the minimum collection, then the trash spawn rate increases for that round until they reach the min
             #Else, the rate stays the same. In both cases, the round (tracked by roundIndex) will move up 
             if currentLevel < len(levelsList):
-                end.failScore = int(sum(levelsList[currentLevel])/3)
+                end.failScore = int(sum(levelsList[currentLevel])/len(levelsList))
                 if scoresList[currentLevel][roundIndex] < levelsList.get(currentLevel)[roundIndex]:
                     trashSpawnRate = 8
                     roundIndex += 1
@@ -289,24 +289,20 @@ while run:
                 #Go to Next Level state and increase currentLevel by 1
                 #In addition, sum the score of the level and display it
                 if len(levelsList.get(currentLevel)) == roundIndex:
+                    # print(f"Level Finished: {currentLevel}")
                     #Sum the score
                     levelComplete.score = sum(scoresList[currentLevel])
                     end.score = levelComplete.score
+                    #Display Score and determine if the player pass or fail
                     gameStatus.setState("levelComplete")
                     #Go to the next level
                     currentLevel += 1
-                    levelComplete.currentLevel = currentLevel
+                    #Update the currentLevel variable in gameEnd class to determine the next scene (pass or fail)
+                    # levelComplete.currentLevel = currentLevel
                     end.currentLevel = currentLevel
                     #Reset round index
                     roundIndex = 0
-
-            #When all levels are played, display the end screen
-            #NOTE: Do I really need this if the ending is already implemented and 
-            #checked in levelComplete class? 
-            else:
-                gameStatus.setState("end")
-                
-                
+                           
     #Get the current gameStatus and check through the gameStates dictionary
     #When there is a match, run the given state
     gameStates[gameStatus.getState()].run()
@@ -435,9 +431,8 @@ while run:
             h_lowbounds = char.speed
             spawnTrash(5, win.backgroundList[10][1], win.backgroundList[10][2], win.backgroundList[10][3], win.backgroundList[10][4])
 
-            #When the player collects 5 trash or presses Q, end the tutorial and reset everything
+            #When the player collects 5 trash or presses Q, end the tutorial and reset the coinPouch and stageCounter
             if levelsList.get(0)[0] <= collectPile or pygame.key.get_pressed()[pygame.K_q]:
-                collectPile = 0
                 coinPouch = 0
                 stageCounter = 0
 

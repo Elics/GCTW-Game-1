@@ -158,7 +158,7 @@ class upgradeShop():
         pygame.display.flip()
         
 #The ending scenes
-class gameEnd():
+class endGame():
     def __init__(self, gameStatus):
         tempWin.currentWindow = tempWin.currentWindow
         self.gameStatus = gameStatus 
@@ -169,6 +169,8 @@ class gameEnd():
     def run(self):
         #Check if the player collect the minimum amount of trash to move on
         #If the player fails, display the fail screen
+        # print(f"End Game: {self.currentLevel}")
+        # print(f"Fail: {self.failScore} Pass: {self.score}")
         if self.failScore > self.score:
             if self.currentLevel == 2:
                 tempWin.currentWindow.blit(tempWin.backgroundList[11][0], (0,0))
@@ -176,23 +178,34 @@ class gameEnd():
             #NOTE: Change this fail screen to the proper level two story 
             if self.currentLevel == 3:
                 tempWin.currentWindow.blit(tempWin.backgroundList[2][0], (0,0))
+            
+            #When player presses SPACE, go back to main menu
+            if pygame.key.get_pressed()[pygame.K_SPACE]:
+                self.gameStatus.setState("start")
 
         #If the player successfully completes the level, start the next cutscene
-        elif self.failScore < self.score:
+        elif self.failScore <= self.score:
+            # print("A level is being chosen")
+            #Continue Playing after tutorial
+            if self.currentLevel == 1:
+                self.gameStatus.setState("runLevel")
+
+            #Play cutscene two
             if self.currentLevel == 2:
                 self.gameStatus.setState("sceneTwo")
             
             #NOTE: Add scene3 here
             if self.currentLevel == 3:
                 pass
-
-        #When player presses SPACE, go back to main menu
-        if pygame.key.get_pressed()[pygame.K_SPACE]:
-            self.gameStatus.setState("start")
-
-        pygame.display.flip()
-
         
+        if self.currentLevel == 3:
+            #When player presses SPACE, go back to main menu
+            if pygame.key.get_pressed()[pygame.K_SPACE]:
+                self.gameStatus.setState("start")
+        
+        pygame.display.flip()  
+
+             
       
 #Runs the collection game mode. To run, I simply toggle the variable collectionMode
 class runLevel():
@@ -204,18 +217,22 @@ class runLevel():
 
     def run(self):
         #NOTE: Use a python equivalent of a switch-case or dictionary?
+        #Level One: Beach
         if self.levelNumber == 1:
             tempWin.currentWindow.blit(tempWin.backgroundList[3][0], (0,0))
             if self.setPlayerPosition == True:
                 self.playerClass.x = 600
                 self.playerClass.y = 400
                 self.setPlayerPosition = False
+        #Tutorial Level
         elif self.levelNumber == 0:
             tempWin.currentWindow.blit(tempWin.backgroundList[10][0], (0,0))
+        #Default Level for testing
         else:
             tempWin.currentWindow.fill("purple")
 
 #When a level is complete, show the total score
+#Then go to endGame class to check the level status (Pass vs Fail)
 class levelComplete():
     def __init__(self, gameStatus, playerClass, fontSet, totalLevels):
         self.gameStatus = gameStatus 
@@ -387,6 +404,10 @@ class sceneOne():
         #Switches to tutorial when it is complete
         self.loopDialogue("runLevel", dialogueList, testBox)
 
+        #If Q is pressed, the player skips the cutscene
+        if pygame.key.get_pressed()[pygame.K_q]:
+            self.gameStatus.setState("runLevel")
+
         pygame.display.flip()
 
 #Summary: The player is introducted to their avatar. They are an alien who works as a taxi driver.
@@ -487,6 +508,10 @@ class prologue(sceneOne):
                 
             self.movementScene(None, self.playerClass.speed, tempWin.backgroundList[9][2], tempWin.backgroundList[9][3], self.height)
         self.loopDialogue("sceneOne", dialogueList, prologueBox)
+
+        #If Q is pressed, the player skips the cutscene
+        if pygame.key.get_pressed()[pygame.K_q]:
+            self.gameStatus.setState("sceneOne")
 
         pygame.display.flip()
 

@@ -41,7 +41,7 @@ class Collector(pygame.sprite.Sprite):
             self.left = True
             self.right = False
             self.standing = False
-        elif keys[pygame.K_RIGHT] and self.x < 500 - self.width - self.vel:
+        elif keys[pygame.K_RIGHT] and self.x < 900 - self.width - self.vel:
             self.x += self.vel
             self.left = False
             self.right = True
@@ -51,7 +51,7 @@ class Collector(pygame.sprite.Sprite):
 
         if keys[pygame.K_UP] and self.y > self.vel:
             self.y -= self.vel
-        if keys[pygame.K_DOWN] and self.y < 500 - self.height - self.vel:
+        if keys[pygame.K_DOWN] and self.y < 700 - self.height - self.vel:
             self.y += self.vel
 
         self.rect.topleft = (self.x, self.y)

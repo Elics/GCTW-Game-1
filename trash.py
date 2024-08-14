@@ -6,6 +6,7 @@ class Trash(pygame.sprite.Sprite):
         self.image = image
         self.rect = self.image.get_rect()
         self.rect.center = pos
+        
 
     def draw(self, screen):
         screen.blit(self.image, self.rect.topleft)
